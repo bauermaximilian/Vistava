@@ -1,0 +1,200 @@
+/* 
+ * Vistava - A media file server with a responsive web browser interface.
+ * Copyright (C) 2020 Maximilian Bauer
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../media/Lato-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../media/Lato-Light.ttf') format('truetype');
+    font-weight: lighter;
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../media/Lato-Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+*{
+    --background: #0a0a0a;
+    --backgroundOverlayAccent : #343434;
+    --backgroundOverlay: #1a1a1d;
+    --foreground: #fffffa;
+    --foregroundAccent: #fafaf0;
+
+    margin: 0;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Lato', sans-serif
+}
+
+h1 {
+    font-weight: bold;
+}
+
+div.dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 3;
+    padding: 50px 75px;
+    background-color: var(--backgroundOverlay);                
+    border-color: var(--backgroundOverlayAccent);
+    border-style: solid;
+    border-width: 0.5px;
+    border-radius: 5px;
+}
+
+form.login {
+    text-align:center;
+    display: inline-block;
+    width:270px;
+}
+
+input.login {
+    display:inline-block;
+    border-radius: 5px;
+    background-color:rgba(0,0,0,0);
+    padding: 8px;
+    margin: 3px;
+    border-style: solid;
+    border-width: 0.5px;
+    border-color: var(--foregroundAccent);
+    color: var(--foreground);
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+    width: 100%;
+}
+
+input.login[type=submit]{
+    width: 100%;
+    margin-top: 15px;
+    background-color:var(--foreground);
+    color: var(--background);
+    border-color: var(--background);
+    -webkit-appearance: none;
+}
+
+img.login {
+    margin-right: 5px;
+    text-align:center;
+    display:inline-block;
+}
+
+h2.login {
+    font-weight: lighter;
+    text-align: center;
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+
+header {
+    background-color: var(--backgroundOverlay);
+    width: 100%;
+    line-height: 70px;
+    height: 70px;
+    position: fixed;
+    top: 0;
+    box-shadow: 0px 0px 7px 7px rgba(0,0,0,0.7);
+    z-index: 10;
+}
+
+h1.header {
+    margin-left: 20px;
+    display: inline-block;
+    font-variant-caps: petite-caps;
+}
+
+a {
+    color:var(--foregroundAccent);
+    font-style: normal;                
+    text-decoration: none;
+}
+
+a.header {
+    display:inline;
+    font-size: 15px;
+    float:right;
+    vertical-align: middle;
+    margin-right:20px;
+}
+
+ul.elements {
+    padding: 0;
+    margin-top: 80px;
+    width: 100%;
+    text-align: center;
+    list-style-type: none;
+}
+
+a.elements {
+    display: inline-block;
+    width:80%;
+    background-color: var(--backgroundOverlay);                
+    border-color: var(--backgroundOverlayAccent);
+    border-style: solid;
+    border-width: 0.5px;
+    border-radius: 5px;
+    margin-bottom:10px;
+    padding:10px;
+    text-align:left;
+}
+
+img.viewer, video.viewer {
+    background-color: var(--backgroundOverlay);
+    border-color: var(--backgroundOverlayAccent);
+    border-style: solid;
+    border-width: 0.5px;
+    border-radius: 5px;
+    padding: 15px;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+div.viewer {
+    position: fixed;
+    left: 0;
+    top: 70px;
+    right: 0;
+    height: calc(100% - 110px); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 30px 30px 30px;
+    z-index:20;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.25s, opacity 0.25s linear;
+}
+
+.shown {
+  visibility: visible;
+  opacity: 1;
+  transition: visibility 0.25s 0.25s, opacity 0.25s 0.25s linear;
+}
