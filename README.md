@@ -2,9 +2,9 @@
 
 A media file server with a responsive web browser interface.
 
-[Download Vistava 0.1 Installer](https://github.com/bauermaximilian/Vistava/releases/download/0.1/VistavaSetup_0.1.exe)
+[Download Vistava 0.1 Installer](https://github.com/bauermaximilian/Vistava/releases/download/0.1/Vistava-0.1_setup.exe)
 
-[Download Vistava 0.1 portable (as ZIP archive)](https://github.com/bauermaximilian/Vistava/releases/download/0.1/VistavaPortable_0.1.zip)
+[Download Vistava 0.1 portable (as ZIP archive)](https://github.com/bauermaximilian/Vistava/releases/download/0.1/Vistava-0.1_portable.zip)
 
 ## About
 
