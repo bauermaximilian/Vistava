@@ -2,9 +2,9 @@
 
 A media file server with a responsive web browser interface.
 
-[Download Vistava 0.1 Installer](https://github.com/bauermaximilian/Vistava/releases/download/0.1/VistavaSetup_0.1.exe)
+[Download Vistava 0.2 Installer](https://github.com/bauermaximilian/Vistava/releases/download/0.2/VistavaSetup_0.2.exe)
 
-[Download Vistava 0.1 portable (as ZIP archive)](https://github.com/bauermaximilian/Vistava/releases/download/0.1/VistavaPortable_0.1.zip)
+[Download Vistava 0.2 portable (as ZIP archive)](https://github.com/bauermaximilian/Vistava/releases/download/0.2/VistavaPortable_0.2.zip)
 
 ## About
 
@@ -14,26 +14,17 @@ There are many good reasons not to put all of your private pictures or videos in
 
 ![screencast](media/screencast.gif)
 
-Vistava is a media file server, which can be executed on your PC and will create a share of a selected directory of media files, which can then be accessed on every other device in your network using a (modern) web browser.
+Vistava is a HTTP media file server, which can be executed on your PC and will create a share of a selected directory of media files, which can then be accessed on every other device in your network using a (modern) web browser.
 
 ## Features
 
-- Support of common image and video formats (like JPG, PNG, GIF, MP4, WEBM)
+- Support of common image and video formats (like JPEG, PNG, GIF, WEBP, MP4, WEBM,...)
 - Easy setup of one or more accounts with different shared folders
 - Fully responsive web interface 
 - Supports Windows and Linux (using mono)
-
-### Planned features
-
-- The ability to switch to the next/previous media file directly in the file viewer
-- A zoom function for images in the file viewer
-- A command-line interface to run the server as service/daemon
-- A more user-friendly setup and configuration
-- An alternative, moodboard-like file view with thumbnails
-- The ability to add tags to files and filter the displayed files using these tags
-- MacOS support
-- A ~~better~~ documentation
+- Direct navigation in the media file viewer
+  Click left or right (besides the media element) to view the previous or next element, close the media viewer by clicking on the header bar
 
 ## Project state
 
-This project is the second version of a private project I created many years ago but never released. Even though many errors and design flaws from the original version were fixed and this version, besides the .NET framework, doesn't have any dependencies (like additional external CSS or JavaScript libraries), it is possible that this application still contains bugs or security vulnerabilities - so it's not recommended to use this server outside your private network (e.g. as public web server).
+This project was initially written without any additional dependencies or libraries. While this was a good practice in "bare" HTML, CSS and JS, it also limits the growth of the application into something more sophisticated. For this reason, the next version of Vistava will be rewritten in ASP.Net Core and React - with lots of new features, like a "moodboard" view, file collections and much more. So... stay tuned!
