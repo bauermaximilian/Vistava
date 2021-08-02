@@ -287,6 +287,9 @@ namespace Vistava.Library
             if (!string.IsNullOrWhiteSpace(rangeHeader))
             {
                 string[] rangeHeaderParts = rangeHeader.Split('=', '-');
+                long fileSize = requestedFile.Length;
+                long rangeEndMax = requestedFile.Length - 1;
+                const int DefaultRangeSize = 1024 * 1024 * 8;
 
                 if (rangeHeaderParts.Length == 3 &&
                     rangeHeaderParts[0] == "bytes" &&
@@ -294,11 +297,12 @@ namespace Vistava.Library
                 {
                     if (string.IsNullOrWhiteSpace(rangeHeaderParts[2]) ||
                         !long.TryParse(rangeHeaderParts[2], out long rangeEnd))
-                        rangeEnd = requestedFile.Length - 1;
+                        rangeEnd = Math.Min(rangeEndMax, 
+                            rangeStart + DefaultRangeSize);
 
-                    if (rangeStart >= 0 && rangeStart < requestedFile.Length
+                    if (rangeStart >= 0 && rangeStart < rangeEndMax
                         && rangeEnd >= 0 && rangeEnd > rangeStart &&
-                        rangeEnd < requestedFile.Length)
+                        rangeEnd <= rangeEndMax)
                     {
                         try
                         {
@@ -308,9 +312,9 @@ namespace Vistava.Library
                                 context.Response.StatusCode = 206;
                                 context.Response.AddHeader("Content-Range",
                                     "bytes " + rangeStart + "-" +
-                                    rangeEnd + "/" + requestedFile.Length);
+                                    rangeEnd + "/" + fileSize);
                                 context.Response.ContentLength64 =
-                                    rangeEnd - rangeStart;
+                                    (rangeEnd + 1) - rangeStart;
                                 context.Response.ContentType = mimeType;
 
                                 byte[] copyBuffer = new byte[1024];
@@ -319,7 +323,8 @@ namespace Vistava.Library
                                 while (true)
                                 {
                                     int targetReadBytesCount = (int)Math.Min(
-                                        1024, rangeEnd - fileStream.Position);
+                                        1024, (rangeEnd + 1) - 
+                                        fileStream.Position);
                                     if (targetReadBytesCount <= 0) break;
 
                                     int readBytesCount = fileStream.Read(
@@ -332,12 +337,20 @@ namespace Vistava.Library
                                 return;
                             }
                         }
-                        catch
+                        catch (Exception exc)
                         {
-                            WriteHtmlResponse(context.Response, 500, 
-                                "Error 500", "Resource access error.");
-                            context.Response.Close();
-                            return;
+                            if (exc is HttpListenerException httpExc)
+                            {
+                                context.Response.Close();
+                                return;
+                            }
+                            else
+                            {
+                                WriteHtmlResponse(context.Response, 500,
+                                    "Error 500", "Resource access error.");
+                                context.Response.Close();
+                                return;
+                            }
                         }
                     }
                     else
