@@ -51,7 +51,8 @@ const ElementId = {
 const CssClass = {
     "Hidden" : "hidden",
     "Shown" : "shown",
-    "DirectoryEntry" : "elements",
+    "DirectoryEntry": "elements",
+    "ParentDirectoryEntry": "parent",
     "FileEntry" : "file",
     "MediaViewer" : "viewer"
 };
@@ -104,10 +105,25 @@ let clearDirectoryView = function() {
     while (directoryElementsListElement.firstChild)
         directoryElementsListElement.removeChild(
             directoryElementsListElement.firstChild);
+
+    let headerElement =
+        document.getElementById(ElementId.Header);
+    if (headerElement) headerElement.onclick = null;
 };
 
 let addElementsToDirectoryView = function(data, clearBefore) {
     if (clearBefore) clearDirectoryView();
+
+    let headerElement =
+        document.getElementById(ElementId.Header);
+    if (headerElement) {
+        let currentDirectoryHash = location.hash;
+        headerElement.onclick = function (self) {
+            if (self.target == headerElement) {
+                window.location.href = currentDirectoryHash;
+            }
+        };
+    }
 
     let directoryElementsListElement = 
         document.getElementById(ElementId.DirectoryList);
@@ -123,7 +139,12 @@ let addElementsToDirectoryView = function(data, clearBefore) {
 
             let elementLink = document.createElement("a");
             elementLink.href = "#" + item.substring(ApiPathRoot.length);
-            elementLink.textContent = item.substring(item.lastIndexOf('/') + 1);
+            if (cssClass.indexOf(CssClass.ParentDirectoryEntry) >= 0)
+                elementLink.textContent = "..";
+            else
+                elementLink.textContent = item.substring(
+                    item.lastIndexOf('/') + 1);
+
             elementLink.className = cssClass;
 
             listElement.appendChild(elementLink);
@@ -132,9 +153,42 @@ let addElementsToDirectoryView = function(data, clearBefore) {
         }
     };
 
+    let parentDirectory = ApiPathRoot + location.hash.substring(1,
+        location.hash.lastIndexOf('/'));
+    if (parentDirectory === ApiPathRoot + "directories")
+        parentDirectory = parentDirectory + "/";
+    if (location.hash !== "#directories/")
+        addListElements([parentDirectory], "elements " +
+            CssClass.ParentDirectoryEntry);
+
     addListElements(data.directories, "elements " + CssClass.DirectoryEntry);
     addListElements(data.files, "elements " + CssClass.FileEntry);
 };
+
+let getAdjacentItemFromDirectory = function (distance) {
+    let directoryElementsListElement =
+        document.getElementById(ElementId.DirectoryList);
+
+    if (!directoryElementsListElement)
+        throw "Directory list for adding elements not found.";
+
+    let itemsCount = directoryElementsListElement.childNodes.length;
+    let baseIndex = null;
+    for (let i = 0; i < itemsCount; i++) {
+        let item = directoryElementsListElement.childNodes.item(i);
+        if (item.firstChild.hash == location.hash) {
+            baseIndex = i;
+            break;
+        }
+    }
+
+    if (baseIndex !== null) {
+        let targetIndex = (baseIndex + distance) % itemsCount;
+        let targetItem =
+            directoryElementsListElement.childNodes.item(targetIndex);
+        return targetItem.firstChild.href;
+    } else return null;
+}
 
 let resetFileContainerContent = function() {
     let mediaContainerElement = 
@@ -144,6 +198,8 @@ let resetFileContainerContent = function() {
 
     while (mediaContainerElement.firstChild)
         mediaContainerElement.removeChild(mediaContainerElement.firstChild);
+
+    mediaContainerElement.onclick = undefined;
 };
 
 let setFileContainerContent = function(resourcePath) {
@@ -161,8 +217,9 @@ let setFileContainerContent = function(resourcePath) {
     extension = extension.toLocaleLowerCase().trim();
 
     let element;
-    if (extension === "jpg" || extension === "jpeg" || extension === "png" || 
-            extension === "gif" || extension === "svg" || extension === "bmp") {
+    if (extension === "jpg" || extension === "jpeg" || extension === "png" ||
+        extension === "gif" || extension === "svg" || extension === "bmp" ||
+        extension === "webp") {
         element = document.createElement("img");
         element.className = CssClass.MediaViewer;
         element.alt = extension + " file";
@@ -181,6 +238,19 @@ let setFileContainerContent = function(resourcePath) {
     else return false;
 
     mediaContainerElement.appendChild(element);
+
+    mediaContainerElement.onclick = function (self) {
+        if (self.target == mediaContainerElement) {
+            if (self.clientX > document.documentElement.clientWidth / 2) {
+                let nextFile = getAdjacentItemFromDirectory(1);
+                if (nextFile) window.location.href = nextFile;
+            } else {
+                let previousFile = getAdjacentItemFromDirectory(-1);
+                if (previousFile) window.location.href = previousFile;
+            }
+        }
+    };
+
     return true;
 };
 
@@ -207,8 +277,7 @@ let sendApiRequestGet = function(fullApiPath, onSuccess, onError) {
     request.send();
 };
 
-let sendApiRequestPost = function(fullApiPath, jsonData, onSuccess, 
-    onError) {
+let sendApiRequestPost = function(fullApiPath, jsonData, onSuccess, onError) {
     let request = new XMLHttpRequest();
 
     request.open("POST", fullApiPath, true);
