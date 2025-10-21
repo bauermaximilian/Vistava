@@ -1,0 +1,67 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+   {
+      "label": "Build app",
+      "type": "shell",
+      "command": "npm run build"
+   },
+   {
+      "label": "Build app (Windows)",
+      "type": "shell",
+      "command": "npm run build:windows"
+   },
+   {
+      "label": "Build app (Linux)",
+      "type": "shell",
+      "command": "npm run build:linux"
+   },
+   {
+      "label": "Start app",
+      "type": "shell",
+      "command": "npm run start"
+   },
+    {
+      "label": "Start app service",
+      "type": "shell",
+      "isBackground": true,
+      "command": "npm run start:service",
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": ".",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "Building...",
+            "endsPattern": "Application started under URL",
+          }
+        }
+      ],
+      "presentation": {
+         "reveal": "silent"
+      }
+    },
+    {
+      "label": "Terminate app service",
+      "command": "echo ${input:terminate-service}",
+      "type": "shell",
+      "presentation": {
+         "reveal": "silent"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "terminate-service",
+      "type": "command",
+      "command": "workbench.action.tasks.terminate",
+      "args": "Start app service"
+    }
+  ]
+}

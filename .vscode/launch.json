@@ -1,0 +1,32 @@
+{
+   "version": "0.2.0",
+   "configurations": [
+      {
+         "type": "chrome",
+         "request": "launch",
+         "name": "Debug app service (Chrome)",
+         "url": "http://localhost:42069",
+         "webRoot": "${workspaceFolder}/service/wwwroot/",
+         "preLaunchTask": "Start app service",
+         "postDebugTask": "Terminate app service"
+      },
+      {
+         "type": "firefox",
+         "request": "launch",
+         "name": "Debug app service (Firefox)",
+         "url": "http://localhost:42069",
+         "webRoot": "${workspaceFolder}/service/wwwroot/",
+         "preLaunchTask": "Start app service",
+         "postDebugTask": "Terminate app service"
+      },
+      {
+         "type": "chrome",
+         "request": "launch",
+         "name": "Debug app service [Window] (Chrome)",
+         "url": "http://localhost:42069/app.html",
+         "webRoot": "${workspaceFolder}/service/wwwroot/",
+         "preLaunchTask": "Start app service",
+         "postDebugTask": "Terminate app service"
+      }
+   ]
+}
