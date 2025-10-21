@@ -1,0 +1,90 @@
+{
+  "name": "vistava",
+  "version": "1.0.0-beta.1",
+  "description": "A no-nonsense multimedia browser for your files, with local network sharing support.",
+  "license": "GPL-3.0-or-later",
+  "author": "Maximilian Bauer",
+  "homepage": "https://vistava.net",
+  "os": [
+    "win32",
+    "linux"
+  ],
+  "type": "module",
+  "main": "src/Vistava.js",
+  "scripts": {
+    "preinstall": "node ./src/DotNetChecker.js --check-sdk",
+    "prebuild:windows": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Windows",
+    "prebuild:linux": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Linux",
+    "prebuild": "npm run prebuild:windows && npm run prebuild:linux",
+    "build:windows": "electron-builder -w",
+    "build:linux": "electron-builder -l",
+    "build": "electron-builder -wl",
+    "prestart": "npm run prebuild",
+    "start": "electron .",
+    "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069"
+  },
+  "devDependencies": {
+    "electron": "^37.3.1",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "productName": "Vistava",
+    "appId": "com.bauermaximilian.vistava",
+    "copyright": "Copyright (C) 2025 Maximilian Bauer",
+    "asar": "false",
+    "electronLanguages": "en-US",
+    "artifactName": "${name}-${os}-${version}.${ext}",
+    "files": [
+      "src/*.js",
+      {
+        "from": "service/bin/Publish/${os}",
+        "to": "bin/${os}",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "extraFiles": [
+      "README.md",
+      "COPYING"
+    ],
+    "linux": {
+      "icon": "build/icon.svg",
+      "category": "Graphics;AudioVideo",
+      "mimeTypes": ["inode/directory"],
+      "maintainer": "Maximilian Bauer",
+      "target": [
+        "AppImage",
+        "pacman",
+        "deb"
+      ]
+    },
+    "pacman": {
+      "depends": [
+        "c-ares", "ffmpeg", "gtk3", "libevent", "libvpx", "libxslt", "libxss", "minizip", "nss", "re2", 
+        "snappy", "libnotify", "libappindicator-gtk3", "aspnet-runtime-8.0", "dotnet-runtime-8.0", "tumbler", "ffmpegthumbnailer"
+      ]
+    },
+    "deb": {
+      "depends": [
+        "libgtk-3-0", "libnotify4", "libnss3", "libxss1", "libxtst6", "xdg-utils", "libatspi2.0-0", 
+        "libuuid1", "libsecret-1-0", "tumbler", "ffmpegthumbnailer"
+      ]
+    },
+    "win": {
+      "target": [
+        "zip", 
+        "nsis"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "artifactName": "${name}-${os}-setup-${version}.${ext}",
+      "deleteAppDataOnUninstall": true,
+      "license": "COPYING",
+      "oneClick": false,
+      "perMachine": true,
+      "uninstallDisplayName": "${productName}"
+    }
+  }
+}
