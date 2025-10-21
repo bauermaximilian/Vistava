@@ -1,0 +1,3 @@
+[submodule "service/wwwroot/Dependencies/vistava.js"]
+	path = service/wwwroot/Dependencies/vistava.js
+	url = git@github.com:bauermaximilian/vistava.js.git
