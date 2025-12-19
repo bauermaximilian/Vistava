@@ -1,7 +1,7 @@
 {
   "name": "vistava",
-  "version": "1.0.0-beta.1",
-  "description": "A no-nonsense multimedia browser for your files, with local network sharing support.",
+  "version": "1.0.0-beta.2",
+  "description": "A no-nonsense multimedia browser for your files.",
   "license": "GPL-3.0-or-later",
   "author": "Maximilian Bauer",
   "homepage": "https://vistava.net",
@@ -54,7 +54,7 @@
       "mimeTypes": ["inode/directory"],
       "maintainer": "Maximilian Bauer",
       "target": [
-        "AppImage",
+        "tar.bz2",
         "pacman",
         "deb"
       ]
