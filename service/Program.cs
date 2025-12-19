@@ -2,7 +2,7 @@
 
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.FileProviders;
 using Vistava.Service.Common;
@@ -151,20 +151,8 @@ public static class Program
     
     private static string GenerateRandomString(int length)
     {
-        var output = new StringBuilder(length); 
-        for (int i = 0; i < length; i++)
-        {
-            int random = Random.Shared.Next(0, 36);
-            if (random < 26)
-            {
-                output.Append((char)(random + 97));
-            }
-            else
-            {
-                output.Append(random - 26);
-            }
-        }
-
-        return output.ToString();
+        return RandomNumberGenerator.GetString(Enumerable.Range(65, 25).Select(i => (char)i)
+            .Concat(Enumerable.Range(97, 25).Select(i => (char)i))
+            .Concat(Enumerable.Range(48, 9).Select(i => (char)i)).ToArray(), length);
     }
 }
