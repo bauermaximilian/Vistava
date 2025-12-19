@@ -14,7 +14,7 @@ namespace Vistava.Service.Services;
 
 public class LocalFileSystem : ILocalFileSystem
 {
-		private const string FileSystemEntryEnumerationPattern = "*";
+	private const string FileSystemEntryEnumerationPattern = "*";
 
 	private record MediaDetails(DateTime LastModification, double? MediaDuration);
 
@@ -38,6 +38,14 @@ public class LocalFileSystem : ILocalFileSystem
 		".svg",
 		".mp4",
 		".webm"
+	];
+
+	private static readonly string[] allowedConvertableFileExtensions =
+	[
+		".tif",
+		".tiff",
+		".psd",
+		".dds"
 	];
 
 	private readonly IComparer<string> filePathComparer = new FilePathComparer();
@@ -288,7 +296,7 @@ public class LocalFileSystem : ILocalFileSystem
 		{
 			results.Add(new FileListEntry
 			{
-								QueryTarget = parentDirectoryPath,
+				QueryTarget = parentDirectoryPath,
 				Type = FileListEntryType.ParentCollection
 			});
 		}
@@ -296,7 +304,7 @@ public class LocalFileSystem : ILocalFileSystem
 		{
 			results.Add(new FileListEntry
 			{
-								QueryTarget = string.Empty,
+				QueryTarget = string.Empty,
 				Type = FileListEntryType.ParentCollection
 			});
 		}
@@ -363,7 +371,7 @@ public class LocalFileSystem : ILocalFileSystem
 		{
 			return new FileListEntry
 			{
-								QueryTarget = parentDirectoryPath,
+				QueryTarget = parentDirectoryPath,
 				Type = FileListEntryType.ParentCollection,
 			};
 		}
@@ -371,7 +379,7 @@ public class LocalFileSystem : ILocalFileSystem
 		{
 			return new FileListEntry
 			{
-								QueryTarget = string.Empty,
+				QueryTarget = string.Empty,
 				Type = FileListEntryType.ParentCollection
 			};
 		}
@@ -414,6 +422,7 @@ public class LocalFileSystem : ILocalFileSystem
 			FileSystemEntryEnumerationPattern, enumerationOptions)
 			.Order(filePathComparer)
 			.Where(filePath => allowedFileExtensions.Contains(Path.GetExtension(filePath)) ||
+				allowedConvertableFileExtensions.Contains(Path.GetExtension(filePath)) ||
 				PlaylistImporter.SupportedFileExtensions.Contains(Path.GetExtension(filePath)))
 			.Skip(start)
 			.Take(limit > 0 ? limit : int.MaxValue)
@@ -427,10 +436,24 @@ public class LocalFileSystem : ILocalFileSystem
 
 			var fileName = Path.GetFileNameWithoutExtension(filePath);
 			var fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
-			var mimeType = mimeTypeProvider.GetMimeType(filePath);
 
 			if (allowedFileExtensions.Contains(fileExtension))
 			{
+				var mimeType = GetMimeType(fileExtension);
+				yield return new FileListEntry
+				{
+					Label = fileName,
+					FileSystemPath = filePath,
+					MediaUrl = BuildApiMediaUrl(filePath, baseHostUri),
+					MediaDuration = mediaDetailsCache.Get<double?>(filePath),
+					MediaType = mimeType,
+					ThumbnailUrl = thumbnailProvider != null ? BuildApiThumbnailUrl(filePath, baseHostUri) : null,
+					ThumbnailType = thumbnailProvider?.ThumbnailMimeType ?? null
+				};
+			}
+			else if (allowedConvertableFileExtensions.Contains(fileExtension))
+			{
+				var mimeType = GetConvertedMimeType(fileExtension);
 				yield return new FileListEntry
 				{
 					Label = fileName,
@@ -488,6 +511,16 @@ public class LocalFileSystem : ILocalFileSystem
 
 			await Task.WhenAll(updateTasks);
 		}
+	}
+
+	private string GetMimeType(string filePath)
+	{
+		return mimeTypeProvider.GetMimeType(filePath);
+	}
+
+	private string GetConvertedMimeType(string filePath)
+	{
+		return mimeTypeProvider.GetMimeType(filePath);
 	}
 
 	private static string BuildApiMediaUrl(string filePath, Uri baseUri)

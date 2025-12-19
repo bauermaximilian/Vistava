@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.StaticFiles;
 
 namespace Vistava.Service.Services;
 
-public class MimeTypeProvider
+public class MimeTypeProvider()
 {
     public const string MimeTypeDefault = "application/octet-stream";
 
@@ -14,13 +14,20 @@ public class MimeTypeProvider
 
     public string GetMimeType(string filePath)
     {
-        if (!baseProvider.TryGetContentType(filePath, out var fileMimeType))
+        if (baseProvider.TryGetContentType(filePath, out var fileMimeType) &&
+            fileMimeType != MimeTypeDefault)
         {
-            return MimeTypeDefault;
+            return fileMimeType;
         }
         else
         {
-            return fileMimeType;
+            var fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
+            return fileExtension switch
+            {
+                ".psd" => "image/psd",
+                ".dds" => "image/vnd-ms.dds",
+                _ => MimeTypeDefault
+            };
         }
     }
 }
