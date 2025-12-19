@@ -1,5 +1,7 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.Text.Json.Serialization;
+
 namespace Vistava.Service.Common;
 
 public class FileListEntry
@@ -7,6 +9,9 @@ public class FileListEntry
     public string? Label { get; init; }
 
     public string? QueryTarget { get; init; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public FileListEntryType Type { get; init; }
 
     public string? IconName { get; init; }
 

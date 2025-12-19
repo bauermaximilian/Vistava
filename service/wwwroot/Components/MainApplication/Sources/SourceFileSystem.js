@@ -70,7 +70,7 @@ class SourceFileSystemContentRetriever extends SourceSegmentedContentRetriever {
    get pageLength() { return 10; }
 
    /** @readonly @type {RateLimiter} */
-   #rateLimiter = new RateLimiter(100);
+   #rateLimiter = new RateLimiter(25);
    /** @readonly @type {string} */
    #hostUrl;
 

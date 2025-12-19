@@ -12,16 +12,9 @@ using Vistava.Service.Controllers;
 
 namespace Vistava.Service.Services;
 
-//TODO: Parallelize FFProbe calls (6 parallel maximum?)
-
 public class LocalFileSystem : ILocalFileSystem
 {
-	private const string ProtectedWhitespace = "\u2007";
-	private const string IconDirectoryUp = "collection-up";
-	private const string IconDirectory = "collection";
-	private const string IconPlaylist = "collection-list";
-
-	private const string FileSystemEntryEnumerationPattern = "*";
+		private const string FileSystemEntryEnumerationPattern = "*";
 
 	private record MediaDetails(DateTime LastModification, double? MediaDuration);
 
@@ -295,18 +288,16 @@ public class LocalFileSystem : ILocalFileSystem
 		{
 			results.Add(new FileListEntry
 			{
-				Label = ProtectedWhitespace,
-				QueryTarget = parentDirectoryPath,
-				IconName = IconDirectoryUp
+								QueryTarget = parentDirectoryPath,
+				Type = FileListEntryType.ParentCollection
 			});
 		}
 		else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 		{
 			results.Add(new FileListEntry
 			{
-				Label = ProtectedWhitespace,
-				QueryTarget = string.Empty,
-				IconName = IconDirectoryUp
+								QueryTarget = string.Empty,
+				Type = FileListEntryType.ParentCollection
 			});
 		}
 
@@ -357,7 +348,7 @@ public class LocalFileSystem : ILocalFileSystem
 				{
 					Label = drive.Name,
 					QueryTarget = drive.Name,
-					IconName = IconDirectory,
+					Type = FileListEntryType.ChildCollection,
 					FileSystemPath = drive.Name
 				};
 			}
@@ -372,18 +363,16 @@ public class LocalFileSystem : ILocalFileSystem
 		{
 			return new FileListEntry
 			{
-				Label = ProtectedWhitespace,
-				QueryTarget = parentDirectoryPath,
-				IconName = IconDirectoryUp
+								QueryTarget = parentDirectoryPath,
+				Type = FileListEntryType.ParentCollection,
 			};
 		}
 		else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 		{
 			return new FileListEntry
 			{
-				Label = ProtectedWhitespace,
-				QueryTarget = string.Empty,
-				IconName = IconDirectoryUp
+								QueryTarget = string.Empty,
+				Type = FileListEntryType.ParentCollection
 			};
 		}
 		else
@@ -411,7 +400,7 @@ public class LocalFileSystem : ILocalFileSystem
 				Label = directoryName,
 				QueryTarget = directoryPath,
 				FileSystemPath = directoryPath,
-				IconName = IconDirectory
+				Type = FileListEntryType.ChildCollection
 			};
 		}
 	}
@@ -460,7 +449,7 @@ public class LocalFileSystem : ILocalFileSystem
 					Label = fileName,
 					QueryTarget = filePath,
 					FileSystemPath = filePath,
-					IconName = IconPlaylist
+					Type = FileListEntryType.ChildCollection
 				};
 			}
 		}
