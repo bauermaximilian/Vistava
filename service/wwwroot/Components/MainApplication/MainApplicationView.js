@@ -23,9 +23,29 @@ export class MainApplicationView extends ViewBase {
    get showTitleBar() { return this.#showTitleBar; }
    set showTitleBar(value) { this.#showTitleBar = value; }
 
-   /** 
+   /**
+    * @template T
+    * @typedef {import("../../Dependencies/vistava.js/src/Shared/Event.js").EventHandler<T>} EventHandler<T>
+    */
+
+   /**
     * @typedef {import("../../Dependencies/vistava.js/src/Components/Vistava/VistavaPresenter.js").
     * VistavaPresenterExtendStateUpdatedEventArgs} VistavaPresenterExtendStateUpdatedEventArgs
+    */
+   
+   /**
+    * @typedef {import("../../Dependencies/vistava.js/src/Components/Vistava/VistavaView.js").
+    * VistavaQueryChangeRequestedEventArgs } VistavaQueryChangeRequestedEventArgs
+    */
+   
+   /**
+    * @typedef {import("../../Dependencies/vistava.js/src/Components/Vistava/VistavaView.js").
+    * TileActionEventArgs } TileActionEventArgs
+    */
+   
+   /** 
+    * @typedef {import("../../Dependencies/vistava.js/src/Components/Shared/HashRouter.js").
+    * HashRouterUpdatedEventArgs} HashRouterUpdatedEventArgs
     */
 
    /** @readonly */
@@ -47,10 +67,18 @@ export class MainApplicationView extends ViewBase {
    /** @type {boolean} */
    #sharingEnabled = false;
 
-   /** @type {boolean} */
-   #qrOutdated = true;
+
+   get #shareLinkFull() {
+      return (this.#shareLinkBase === null || this.#shareLinkHash === null) ?
+         null : (this.#shareLinkBase + this.#shareLinkHash);
+   }
+
+   /** @type {string} */
+   #qrCodeContent = "";
    /** @type {string?} */
-   #qrText = ""
+   #shareLinkBase = null;
+   /** @type {string?} */
+   #shareLinkHash = null;
    /** @type {boolean} */
    #isLoading = false;
    
@@ -78,8 +106,12 @@ export class MainApplicationView extends ViewBase {
    #shareLinkPopupAnchor = null;
    /** @type {HTMLDivElement?} */
    #shareLinkPopup = null;
+   /** @type {HTMLDivElement?} */
+   #shareLinkPopupHint = null;
    /** @type {HTMLLabelElement?} */
    #shareLinkPopupHintText = null;
+   /** @type {GuiIconView?} */
+   #shareLinkPopupHintIcon = null;
    /** @type {HTMLLabelElement?} */
    #shareLinkPopupLinkText = null;
    /** @type {any?} */
@@ -179,11 +211,11 @@ export class MainApplicationView extends ViewBase {
    #handleOnFullscreenChange = () => {
       if (BrowserUtils.isFullscreen) {
          if (this.#titleBar !== null) {
-            this.#titleBar.style.visibility = "collapse";
+            this.#titleBar.style.display = "none";
          }
       } else {
          if (this.#titleBar !== null) {
-            this.#titleBar.style.visibility = "visible";
+            this.#titleBar.style.display = "flex";
          }
       }
    };
@@ -295,14 +327,14 @@ export class MainApplicationView extends ViewBase {
             s.opacity = "0";
             s.padding = "5px";
          }, (e, s) => {
-            if (this.#qrOutdated) {
+            if (this.#shareLinkFull !== null && this.#qrCodeContent !== this.#shareLinkFull) {
                for (let child of e.children) {
                   if (child instanceof HTMLCanvasElement) {
                      child.remove();
                   }
                }
                QrCreator.render({
-                  text: this.#qrText,
+                  text: this.#shareLinkFull,
                   radius: 0,
                   ecLevel: "H",
                   size: "250"
@@ -311,7 +343,6 @@ export class MainApplicationView extends ViewBase {
                   e.firstChild.style.width = "100%";
                   e.firstChild.style.height = "";
                }
-               this.#qrOutdated = false;
             }
          });
 
@@ -323,24 +354,32 @@ export class MainApplicationView extends ViewBase {
             s.fontWeight = "600";
             s.order = "1";
          }, (e, s) => {
-            e.innerText = this.#qrText ?? "";
+            e.innerText = this.#shareLinkBase ?? "";
          });
-         this.#shareLinkPopupHintText = cu(this.#shareLinkPopupHintText, HTMLLabelElement, this.#shareLinkPopup, (e, s) => {
-            s.fontFamily = `-apple-system, "Segoe UI", Roboto, sans-serif`;
-            s.fontSize = "10px";
-            s.color = "black";
-            s.opacity = "50%";
+         this.#shareLinkPopupHint = cu(this.#shareLinkPopupHint, HTMLDivElement, this.#shareLinkPopup, (e, s) => {
             s.order = "2";
-            s.padding = "3px 3px 4px";
-            s.fontStyle = "italic";
-            e.innerText = "click to copy link to clipboard";
+            this.#shareLinkPopupHintText = cu(this.#shareLinkPopupHintText, HTMLLabelElement, e, (e, s) => {
+               s.fontFamily = `-apple-system, "Segoe UI", Roboto, sans-serif`;
+               s.fontSize = "10px";
+               s.color = "black";
+               s.opacity = "50%";
+               s.padding = "3px 3px 4px";
+               s.fontStyle = "italic";
+               e.innerText = "click to copy link to clipboard";
+            });
+            this.#shareLinkPopupHintIcon = cu(this.#shareLinkPopupHintIcon, GuiIconView, e, (e, s) => {
+               s.width = s.height = "10px";
+               s.display = "inline-block";
+               s.transition = "opacity 0.2s ease-in-out";
+               s.opacity = "0";
+               e.presenter = new GuiIconPresenter({ icon: "check", isInteractive: false });
+            });
          });
       }
 
       this.#vistavaView = cu(this.#vistavaView, VistavaView, this.root, (e, s) => {
          s.flexGrow = "1";
          s.overflow = "hidden";
-      }, (e, s) => {
          let layoutTypes = VistavaLayoutTypes.default;
          this.#vistavaPresenter = e.presenter ??= new VistavaPresenter(
             query => this.#source.createCollectionRetriever(query),
@@ -433,8 +472,7 @@ export class MainApplicationView extends ViewBase {
             if (this.#shareToggleButton != null && url != null) {
                this.#sharingEnabled = !this.#sharingEnabled;
                this.#getSetElementAttribute(this.#shareToggleButton, "data-activated", this.#sharingEnabled);
-               this.#qrText = url;
-               this.#qrOutdated = true;
+               this.#shareLinkBase = url;
             } else {
                this.#sharingEnabled = false;
             }
@@ -449,12 +487,13 @@ export class MainApplicationView extends ViewBase {
    #handleOnShareLinkClick = async () => {
       const type = "text/plain";
       const clipboardItemData = {
-         [type]: this.#qrText ?? "",
+         [type]: this.#shareLinkFull ?? "",
       };
       const clipboardItem = new ClipboardItem(clipboardItemData);
       await navigator.clipboard.write([clipboardItem]);
       
       this.#shareLinkButton?.presenter?.model.apply({ icon: "link-ok" });
+      this.#shareLinkPopupHintIcon?.style.setProperty("opacity", "1");
 
       if (this.#shareLinkButtonAnimationHandle != null) {
          clearTimeout(this.#shareLinkButtonAnimationHandle);
@@ -462,11 +501,12 @@ export class MainApplicationView extends ViewBase {
       this.#shareLinkButtonAnimationHandle =
          setTimeout(() => {
             this.#shareLinkButton?.presenter?.model.apply({ icon: "link" });
+            this.#shareLinkPopupHintIcon?.style.setProperty("opacity", "0");
             this.#shareLinkButtonAnimationHandle = null;
          }, 2000);
    };
 
-   /** @type {import("../../Dependencies/vistava.js/src/Shared/Event.js").EventHandler<import("../../Dependencies/vistava.js/src/Components/Vistava/VistavaView.js").TileActionEventArgs>} */
+   /** @type {EventHandler<TileActionEventArgs>} */
    #handleOnTilePrimaryAction = (args) => {
       let model = args.tile.presenter?.model;
       if (model == null) { return; }
@@ -487,7 +527,7 @@ export class MainApplicationView extends ViewBase {
       }
    };
 
-   /** @type {import("../../Dependencies/vistava.js/src/Shared/Event.js").EventHandler<import("../../Dependencies/vistava.js/src/Components/Vistava/VistavaView.js").VistavaQueryChangeRequestedEventArgs>} */
+   /** @type {EventHandler<VistavaQueryChangeRequestedEventArgs>} */
    #handleOnQueryChangeRequested = (args) => {
       if (args.query !== this.#vistavaPresenter?.state.query) {
          this.#hashRouter.index = 0;
@@ -501,7 +541,7 @@ export class MainApplicationView extends ViewBase {
    };
 
    /**
-    * @param {import("../../Dependencies/vistava.js/src/Components/Shared/HashRouter.js").HashRouterUpdatedEventArgs} args 
+    * @param {HashRouterUpdatedEventArgs} args 
     */
    #handleOnHashUpdated = (args) => {
       if (!args.externalOrigin || this.#vistavaPresenter === null) {
@@ -515,6 +555,8 @@ export class MainApplicationView extends ViewBase {
          this.#hashRouter.index = focussedTileIndex;
          this.#hashRouter.updateWindowHash(true);
       }
+
+      this.#shareLinkHash = this.#hashRouter.hashPathOnly;
 
       this.#vistavaPresenter.updateState({
          index: this.#hashRouter.index ?? 0,
