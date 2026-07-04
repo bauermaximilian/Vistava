@@ -22,19 +22,23 @@ Vistava is completely free, open source and supported on Windows and Linux, with
 
 ### Windows
 
-Go to the "Releases" section and download the most recent Vistava installer (recommended) or the ZIP archive for running the application without installing. After installing or extracting the application, run the application using the Desktop shortcut or by opening the "Vistava" executable in the extracted directory.
+Go to the "Releases" section and download the most recent Vistava installer (recommended) or the ZIP archive for running the application without installing. When using the ZIP version, make sure you have a full and recent version of ffmpeg installed (and available in your PATH).
+
+After installing or extracting the application, run the application using the Desktop shortcut or by opening the "Vistava" executable in the extracted directory.
 
 ### Linux
 
-Depending on your distribution, you can choose between downloading a Pacman package (for Arch and derivatives), a DEB package (for Debian, Ubuntu and derivatives) or an AppImage. 
-
-When using the DEB package, you might have to install the .NET Runtime (8.0.20 or newer) _and_ the ASP.NET Runtime (8.0.20 or newer) manually - see [this link](https://learn.microsoft.com/en-us/dotnet/core/install/linux) for setup instructions.
-
-When using the Appimage, additionally to installing the .NET Runtime (8.0.20 or newer) _and_ the ASP.NET Runtime (8.0.20 or newer) manually, you might have to install the dependencies "[tumbler](https://docs.xfce.org/xfce/tumbler/start)" and "[ffmpegthumbnailer](https://apps.kde.org/ffmpegthumbs/)" - otherwise, the app might not start correctly or display no file thumbnails.
+Depending on your distribution, you can choose between downloading a flatpak version (for any Linux distribution supporting flatpak), a pacman package (for Arch and derivatives) or a simple archive with the precompiled binaries. The latter will require a valid (full) installation of ffmpeg available on the system. Currently, only the AMD64 architecture is supported.
 
 ### Build from source
 
 To build the application from source, Node.js (24.9 or newer), npm (11.6.2 or newer) and the .NET SDK (8.0.20 or newer) are required. Either open the root repository folder in VSCode and run the "Build app" task, or open a command line interface inside the root folder and run `npm install` and `npm run build` (or, depending on your target platform, `npm run build:windows` or `npm run build:linux`). See the `/dist` folder for the build output.
+
+#### Flatpak build dependencies
+
+For building the flatpak version, make sure you have `flatpak` and `flatpak-builder` installed. Additionally, the runtime and SDK need to be installed as well using `flatpak install org.freedesktop.Platform/x86_64/25.08`, `flatpak install org.freedesktop.Sdk/x86_64/25.08` and `flatpak install app/org.electronjs.Electron2.BaseApp/x86_64/25.08`.
+
+The flatpak bundler pulls the sources for ffmpeg, lib-dav1d and lib-x264 from their respective Git repositories and installs these dependencies into the flatpak, which can take 5-10 minutes (or longer) depending on your hardware. If the process fails, you can either use the npm script "build:linux-debug" to display verbose build information for troubleshooting, or remove the "flatpak" entry from "build.linux.target" (to skip building the flatpak).
 
 ## Usage
 

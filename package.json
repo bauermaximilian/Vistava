@@ -1,7 +1,8 @@
 {
   "name": "vistava",
-  "version": "1.0.0-beta.2",
-  "description": "A no-nonsense multimedia browser for your files.",
+  "desktopName": "com.bauermaximilian.vistava",
+  "version": "1.0.0-beta.3",
+  "description": "A no-nonsense media file browser",
   "license": "GPL-3.0-or-later",
   "author": "Maximilian Bauer",
   "homepage": "https://vistava.net",
@@ -16,12 +17,13 @@
     "prebuild:windows": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Windows",
     "prebuild:linux": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Linux",
     "prebuild": "npm run prebuild:windows && npm run prebuild:linux",
-    "build:windows": "electron-builder -w",
-    "build:linux": "electron-builder -l",
+    "build:windows": "npm run prebuild:windows && electron-builder -w",
+    "build:linux-debug": "npm run prebuild:linux && env DEBUG='@malept/flatpak-bundler' electron-builder -l",
+    "build:linux": "npm run prebuild:linux && electron-builder -l",
     "build": "electron-builder -wl",
     "prestart": "npm run prebuild",
-    "start": "electron .",
-    "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069"
+    "start": "electron . --debug-mode",
+    "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069 --debug=true"
   },
   "devDependencies": {
     "electron": "^37.3.1",
@@ -30,7 +32,7 @@
   "build": {
     "productName": "Vistava",
     "appId": "com.bauermaximilian.vistava",
-    "copyright": "Copyright (C) 2025 Maximilian Bauer",
+    "copyright": "Copyright (C) 2026 Maximilian Bauer",
     "asar": "false",
     "electronLanguages": "en-US",
     "artifactName": "${name}-${os}-${version}.${ext}",
@@ -51,43 +53,96 @@
     "linux": {
       "icon": "build/icons/",
       "category": "Graphics;AudioVideo",
-      "mimeTypes": ["inode/directory"],
+      "mimeTypes": [
+        "inode/directory"
+      ],
       "maintainer": "Maximilian Bauer",
       "target": [
         "tar.bz2",
         "pacman",
-        "deb"
-      ]
+        "flatpak"
+      ],
+      "syncDesktopName": true
     },
     "pacman": {
       "depends": [
         "c-ares",
-"gtk3",
-"libevent",
-"libvpx",
-"libxslt",
-"libxss",
-"minizip",
-"nss",
-"re2", 
+        "gtk3",
+        "libevent",
+        "libvpx",
+        "libxslt",
+        "libxss",
+        "minizip",
+        "nss",
+        "re2",
         "snappy",
-"libnotify",
-"libappindicator-gtk3",
+        "libnotify",
+        "libappindicator-gtk3",
         "ffmpeg"
       ]
     },
-    "deb": {
-      "depends": [
-        "libgtk-3-0",
-        "libnotify4",
-        "libnss3",
-        "libxss1",
-        "libxtst6",
-        "xdg-utils",
-        "libatspi2.0-0",
-        "libuuid1",
-        "libsecret-1-0",
-        "ffmpeg"
+    "flatpak": {
+      "runtime": "org.freedesktop.Platform",
+      "runtimeVersion": "25.08",
+      "sdk": "org.freedesktop.Sdk",
+      "base": "org.electronjs.Electron2.BaseApp",
+      "baseVersion": "25.08",
+      "license": "COPYING",
+      "useWaylandFlags": true,
+      "modules": [
+        {
+          "name": "dav1d",
+          "buildsystem": "meson",
+          "sources": [
+            {
+              "type": "git",
+              "url": "https://code.videolan.org/videolan/dav1d.git"
+            }
+          ]
+        },
+        {
+          "name": "x264",
+          "sources": [
+            {
+              "type": "git",
+              "url": "https://code.videolan.org/videolan/x264.git"
+            }
+          ],
+          "config-opts": [
+            "--enable-shared"
+          ]
+        },
+        {
+          "name": "ffmpeg",
+          "sources": [
+            {
+              "type": "git",
+              "url": "https://git.ffmpeg.org/ffmpeg.git",
+              "tag": "n8.1.1"
+            }
+          ],
+          "config-opts": [
+            "--enable-gpl",
+            "--enable-libdav1d",
+            "--enable-libx264",
+            "--disable-static",
+            "--disable-doc",
+            "--enable-shared",
+            "--disable-ffplay"
+          ]
+        }
+      ],
+      "finishArgs": [
+        "--socket=x11",
+        "--socket=wayland",
+        "--share=ipc",
+        "--share=network",
+        "--filesystem=home:r",
+        "--talk-name=org.freedesktop.Notifications",
+        "--talk-name=org.kde.StatusNotifierWatcher",
+        "--talk-name=com.canonical.AppMenu.Registrar",
+        "--device=dri",
+        "--socket=pulseaudio"
       ]
     },
     "win": {
