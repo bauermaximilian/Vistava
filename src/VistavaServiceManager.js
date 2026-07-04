@@ -5,7 +5,6 @@ import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
 import { InvalidOperationError } from "./Errors.js";
-import { DotNetChecker } from "./DotNetChecker.js";
 
 export class VistavaServiceManager {
    get url() { return this.#url; }
@@ -14,18 +13,8 @@ export class VistavaServiceManager {
    #process = null;
    /** @type {string?} */
    #url = null;
-   /** @type {boolean} */
-   #skipDotnetCheck;
-   
-   constructor(skipDotnetCheck = false) {
-      this.#skipDotnetCheck = skipDotnetCheck;
-   }
 
-   async start() {
-      if (!this.#skipDotnetCheck) {
-         await DotNetChecker.ensureRuntimeInstalled();
-      }
-
+   async start(debug = false) {
       if (this.#process !== null) {
          throw new InvalidOperationError("The service is already running.");
       }
@@ -34,7 +23,11 @@ export class VistavaServiceManager {
       let serviceCwd = path.dirname(servicePath);
 
       this.#process = await new Promise((resolve, reject) => {
-         let childProcess = spawn(servicePath, ["--randomizeBasePath=true"], {
+         let processArgs = ["--randomizeBasePath=true"];
+         if (debug) {
+            processArgs.push("--debug=true");
+         }
+         let childProcess = spawn(servicePath, processArgs, {
             stdio: "pipe",
             cwd: serviceCwd,
             windowsHide: true
@@ -51,19 +44,21 @@ export class VistavaServiceManager {
             return;
          }
          let isResolved = false;
-         let apiProcessFileHandler = (data) => {
+         let apiProcessFileHandler = (/** @type {Buffer} */ data) => {
             let appUrlCandidate = this.#extractAppRootUrl(String(data));
             if (appUrlCandidate != null && appUrlCandidate.trim().length > 0) {
                this.#process?.stdout.removeListener("data", apiProcessFileHandler);
                if (!appUrlCandidate.endsWith("/")) {
                   appUrlCandidate += "/";
                }
+               console.log("Local vistava application server started successfully - redirecting output.");
                this.#url = `${appUrlCandidate}app.html`;
                isResolved = true;
                resolve();
             }
          };
          this.#process.stdout.on("data", apiProcessFileHandler);
+         this.#process.stdout.on("data", this.#handleServerLogOutput);
          setTimeout(() => {
             if (!isResolved) {
                isResolved = true;
@@ -78,12 +73,11 @@ export class VistavaServiceManager {
       this.#process = null;
    }
 
-   /**
-    * Opens the default web browser and navigates to a page where the user can download dotnet.
-    */
-   async openBrowserWithDownloadLink() {
-      await DotNetChecker.openBrowserWithDownloadLink();
-   }
+   #handleServerLogOutput = (/** @type {Buffer} */ data) => {
+      if (this.#url != null) {
+         process.stdout.write(String(data));
+      }
+   };
 
    /**
     * @param {string} input 

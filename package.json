@@ -61,14 +61,33 @@
     },
     "pacman": {
       "depends": [
-        "c-ares", "ffmpeg", "gtk3", "libevent", "libvpx", "libxslt", "libxss", "minizip", "nss", "re2", 
-        "snappy", "libnotify", "libappindicator-gtk3", "aspnet-runtime-8.0", "dotnet-runtime-8.0", "tumbler", "ffmpegthumbnailer"
+        "c-ares",
+"gtk3",
+"libevent",
+"libvpx",
+"libxslt",
+"libxss",
+"minizip",
+"nss",
+"re2", 
+        "snappy",
+"libnotify",
+"libappindicator-gtk3",
+        "ffmpeg"
       ]
     },
     "deb": {
       "depends": [
-        "libgtk-3-0", "libnotify4", "libnss3", "libxss1", "libxtst6", "xdg-utils", "libatspi2.0-0", 
-        "libuuid1", "libsecret-1-0", "tumbler", "ffmpegthumbnailer"
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libuuid1",
+        "libsecret-1-0",
+        "ffmpeg"
       ]
     },
     "win": {

@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.FileProviders;
 using Vistava.Service.Common;
 using Vistava.Service.Contracts;
@@ -24,7 +22,7 @@ public static class Program
             .SkipWhile(c => ambiguousCharacters.Contains(c))
             .ToArray();
     }
-    
+
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateSlimBuilder();
@@ -43,8 +41,8 @@ public static class Program
         }
     }
 
-    private static WebApplication BuildApplication(WebApplicationBuilder builder, 
-        IConfiguration userConfiguration, Action<IServiceCollection> configureServices, 
+    private static WebApplication BuildApplication(WebApplicationBuilder builder,
+        IConfiguration userConfiguration, Action<IServiceCollection> configureServices,
         Action<IApplicationBuilder> configureApplication)
     {
         var serviceConfiguration = ServiceConfiguration.Parse(userConfiguration);
@@ -58,14 +56,14 @@ public static class Program
             { "Logging:LogLevel:Default", defaultLogLevel },
             { "Logging:LogLevel:Microsoft.AspNetCore", "Warning" },
         });
-        
+
         configureServices(builder.Services);
 
         string listenerUrl = GenerateListenerUrl(serviceConfiguration);
         var kestrelProperties = new KestrelProperties() { Endpoint = listenerUrl };
         builder.Services.AddSingleton(kestrelProperties);
         builder.WebHost.UseKestrel((_, options) => options.Configure(kestrelProperties.Configuration, true));
-        
+
         string basePath = serviceConfiguration.RandomizeBasePath ? $"/{GenerateRandomString(6)}" : "";
         builder.Services.AddSingleton(new ApplicationParameters(basePath));
 
@@ -94,16 +92,8 @@ public static class Program
         services.AddSingleton<ILocalFileSystem, LocalFileSystem>();
         services.AddSingleton<MimeTypeProvider>();
         services.AddSingleton<AppPathProvider>();
-        services.AddTransient<IMemoryCache, MemoryCache>();
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            services.AddSingleton<IThumbnailProvider, WindowsThumbnailProvider>();
-        } 
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            services.AddSingleton<IThumbnailProvider, LinuxThumbnailProvider>();
-        }
+        services.AddSingleton<MediaFileInfoProvider>();
+        services.AddSingleton<IThumbnailProvider, EmbeddedThumbnailProvider>();
     }
 
     private static void ConfigureApplication(IApplicationBuilder app)
@@ -129,7 +119,7 @@ public static class Program
     {
         return $"http://{(configuration.Public ? "*" : "127.0.0.1")}:{configuration.Port}";
     }
-    
+
     private static string GenerateRandomString(int length)
     {
         return RandomNumberGenerator.GetString(RandomUrlCharacters, length);

@@ -10,6 +10,8 @@ public class MimeTypeProvider()
 
     public const string MimeTypePng = "image/png";
 
+    public const string MimeTypeJpeg = "image/jpeg";
+
     private readonly FileExtensionContentTypeProvider baseProvider = new();
 
     public string GetMimeType(string filePath)

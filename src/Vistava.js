@@ -4,9 +4,11 @@ import { app, dialog } from "electron";
 import fs from "fs";
 import { VistavaServiceManager } from "./VistavaServiceManager.js";
 import { VistavaWindow } from "./VistavaWindow.js";
-import { InvalidOperationError, MissingDependenciesError, MissingDotNetDependencyError } from "./Errors.js";
+import { InvalidOperationError, MissingDependenciesError } from "./Errors.js";
+import { FFmpegChecker } from "./FFmpegChecker.js";
 
-const cliFlagSkipDotnetCheck = "--skip-dotnet-check";
+const cliFlagSkipFFmpegCheck = "--skip-ffmpeg-check";
+const cliFlagDebug = "--debug-mode";
 
 export class Vistava {
    /** @type {VistavaWindow} */
@@ -14,9 +16,9 @@ export class Vistava {
    /** @type {VistavaServiceManager} */
    #service;
 
-   constructor(skipDotnetCheck = false) {
+   constructor() {
       this.#window = new VistavaWindow();
-      this.#service = new VistavaServiceManager(skipDotnetCheck);
+      this.#service = new VistavaServiceManager();
    }
 
    /**
@@ -38,7 +40,8 @@ export class Vistava {
 
       await app.whenReady();
 
-      let skipDotnetCheck = argv?.find(arg => arg.toLowerCase().startsWith(cliFlagSkipDotnetCheck)) != null;
+      let skipFFmpegCheck = argv?.find(arg => arg.toLowerCase().startsWith(cliFlagSkipFFmpegCheck)) != null;
+      
       let urlFragment = "#/";
       try {
          if (argv != null && argv.length > 0) {
@@ -50,26 +53,38 @@ export class Vistava {
       } catch { }
       
       try {
-         vistava = new Vistava(skipDotnetCheck);
-         await vistava.#service.start();
+         vistava = new Vistava();
+         
+         await vistava.#service.start(argv?.find(arg => arg.toLowerCase().startsWith(cliFlagDebug)) != null);
          if (vistava.#service.url === null) {
             throw new InvalidOperationError("The service did not provide a valid application URL.");
          }
+
+         if (!skipFFmpegCheck) {
+            try {
+               await FFmpegChecker.ensureFFmpegInstalled();
+            } catch (error) {
+               let result = await vistava.#window.showDialog({
+                  title: "Missing dependencies",
+                  message: "FFmpeg/FFprobe is not installed or wasn't found.\n" +
+                     "The application can be used, but video thumbnails will not be available. " +
+                     "Do you want to open a web browser to download ffmpeg?",
+                  buttons: ["Yes", "No"],
+                  type: "warning"
+               });
+
+               if (result.response === 0) {
+                  await FFmpegChecker.openBrowserToDownloadFFmpeg();
+                  onClosing();
+                  return;
+               }
+            }
+         }
+
          await vistava.#window.show(`${vistava.#service.url}${urlFragment}`);
       } catch (error) {
          if (vistava == null) {
             dialog.showErrorBox("Initialization failed", "The application couldn't be initialized properly.");
-         } else if (error instanceof MissingDotNetDependencyError) {
-            let result = await vistava.#window.showDialog({
-               title: "Missing dependencies",
-               message: `The application couldn't be started: ${error.message} ` +
-                  "Do you want to open the website to download the missing dependencies?",
-               buttons: ["OK", "Cancel"],
-               type: "warning"
-            });
-            if (result.response === 0) {
-               await vistava.#service.openBrowserWithDownloadLink();
-            }
          }
          else if (error instanceof MissingDependenciesError) {
             dialog.showErrorBox("Missing dependencies",

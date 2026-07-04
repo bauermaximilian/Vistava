@@ -4,19 +4,16 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Web;
-using FFMpegCore;
-using Microsoft.Extensions.Caching.Memory;
 using Vistava.Service.Common;
 using Vistava.Service.Contracts;
 using Vistava.Service.Controllers;
+using Vistava.Service.Utils;
 
 namespace Vistava.Service.Services;
 
 public class LocalFileSystem : ILocalFileSystem
 {
 	private const string FileSystemEntryEnumerationPattern = "*";
-
-	private record MediaDetails(DateTime LastModification, double? MediaDuration);
 
 	/// <summary>
 	/// Defines the content of a valid PNG file that consists of one grey pixel.
@@ -28,25 +25,6 @@ public class LocalFileSystem : ILocalFileSystem
 		0xAF, 0xAF, 0xFF, 0x0F, 0x00, 0x05, 0x7B, 0x02, 0x7D, 0x1B, 0x81, 0xA3, 0x90, 0x00, 0x00,
 		0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
 	};
-	private static readonly string[] allowedFileExtensions =
-	[
-		".jpg",
-		".jpeg",
-		".png",
-		".gif",
-		".webp",
-		".svg",
-		".mp4",
-		".webm"
-	];
-
-	private static readonly string[] allowedConvertableFileExtensions =
-	[
-		".tif",
-		".tiff",
-		".psd",
-		".dds"
-	];
 
 	private readonly IComparer<string> filePathComparer = new FilePathComparer();
 	private static readonly EnumerationOptions enumerationOptions = new()
@@ -54,45 +32,19 @@ public class LocalFileSystem : ILocalFileSystem
 		IgnoreInaccessible = true,
 		AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
 	};
-
-	private readonly MemoryCacheEntryOptions cacheEntryOptions = new MemoryCacheEntryOptions()
-	{
-		AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
-	};
-
-	private readonly IMemoryCache mediaDetailsCache;
+	
 	private readonly ILogger<LocalFileSystem> logger;
 	private readonly MimeTypeProvider mimeTypeProvider;
-	private readonly IThumbnailProvider? thumbnailProvider;
-	private readonly bool enableFFProbe;
+	private readonly MediaFileInfoProvider mediaFileInfoProvider;
+	private readonly IThumbnailProvider thumbnailProvider;
 
-	public LocalFileSystem(IThumbnailProvider? thumbnailProvider, IMemoryCache mediaDetailsCache, 
-		MimeTypeProvider mimeTypeProvider, ILogger<LocalFileSystem> logger)
+	public LocalFileSystem(IThumbnailProvider thumbnailProvider, MimeTypeProvider mimeTypeProvider, 
+		MediaFileInfoProvider mediaFileInfoProvider, ILogger<LocalFileSystem> logger)
 	{
 		this.logger = logger;
 		this.mimeTypeProvider = mimeTypeProvider;
+		this.mediaFileInfoProvider = mediaFileInfoProvider;
 		this.thumbnailProvider = thumbnailProvider;
-		if (thumbnailProvider == null)
-		{
-			logger.LogWarning("No thumbnail provider was found - " +
-				"file thumbnails will not be available.");
-		}
-		
-		this.mediaDetailsCache = mediaDetailsCache;
-
-		try
-		{
-			if (string.IsNullOrWhiteSpace(GlobalFFOptions.GetFFProbeBinaryPath()))
-			{
-				throw new InvalidOperationException("FFProbe binary not found.");
-			}
-
-			enableFFProbe = true;
-		}
-		catch (Exception exc)
-		{
-			logger.LogWarning("Video duration detection not supported ({error}).", exc.Message);
-		}
 	}
 
 	public async Task<FileListEntryHandle> GetThumbnailAsync(string path, CancellationToken token)
@@ -102,7 +54,7 @@ public class LocalFileSystem : ILocalFileSystem
 		Stream? thumbnailStream = null;
 		string? contentType = null;
 
-		if (thumbnailProvider?.ThumbnailMimeType != null)
+		if (thumbnailProvider.ThumbnailMimeType != null)
 		{
 			contentType = thumbnailProvider.ThumbnailMimeType;
 			try
@@ -112,8 +64,11 @@ public class LocalFileSystem : ILocalFileSystem
 			}
 			catch (Exception exc)
 			{
-				logger.LogWarning("The thumbnail for file {path} couldn't be loaded. {exc}",
-					path, exc.Message);
+				if (exc is not OperationCanceledException or TaskCanceledException)
+				{
+					logger.LogWarning("The thumbnail for file '{path}' couldn't be loaded. {exc}",
+						path, exc.Message);
+				}
 			}
 		}
 
@@ -318,11 +273,9 @@ public class LocalFileSystem : ILocalFileSystem
 				throw new TaskCanceledException();
 			}
 
-			string fileExtension = Path.GetExtension(playlistItem.FilePath);
 			string mimeType = mimeTypeProvider.GetMimeType(playlistItem.FilePath);
 
-			if (allowedFileExtensions == null ||
-				allowedFileExtensions.Contains(fileExtension.ToLowerInvariant()))
+			if (MediaFileTypes.IsSupported(playlistItem.FilePath))
 			{
 				results.Add(new FileListEntry
 				{
@@ -330,7 +283,7 @@ public class LocalFileSystem : ILocalFileSystem
 					MediaUrl = BuildApiMediaUrl(playlistItem.FilePath, baseHostUri),
 					MediaType = mimeType,
 					ThumbnailUrl = BuildApiThumbnailUrl(playlistItem.FilePath, baseHostUri),
-					ThumbnailType = "image/jpeg",
+					ThumbnailType = MimeTypeProvider.MimeTypeJpeg,
 					FileSystemPath = playlistItem.FilePath
 				});
 			}
@@ -416,28 +369,35 @@ public class LocalFileSystem : ILocalFileSystem
 	private async IAsyncEnumerable<FileListEntry> EnumeratePathFileEntriesAsync(string path, Uri baseHostUri,
 		int start, int limit, [EnumeratorCancellation] CancellationToken token)
 	{
+		var stopwatch = Stopwatch.StartNew();
+		
 		List<string> entriesEnumerator = [];
 
 		await Task.Run(() => entriesEnumerator = Directory.EnumerateFiles(path,
 			FileSystemEntryEnumerationPattern, enumerationOptions)
 			.Order(filePathComparer)
-			.Where(filePath => allowedFileExtensions.Contains(Path.GetExtension(filePath)) ||
-				allowedConvertableFileExtensions.Contains(Path.GetExtension(filePath)) ||
+			.Where(filePath => MediaFileTypes.IsSupported(filePath) ||
 				PlaylistImporter.SupportedFileExtensions.Contains(Path.GetExtension(filePath)))
 			.Skip(start)
 			.Take(limit > 0 ? limit : int.MaxValue)
 			.ToList(), token);
-		
-		await UpdateMediaFileDurationCacheAsync(entriesEnumerator, token);
-		
+
+		await mediaFileInfoProvider.PrecacheMediaFileInfosAsync(entriesEnumerator, token);
+
+		async Task<double?> GetMediaDurationAsync(string filePath)
+		{
+			return (await mediaFileInfoProvider.GetMediaFileInfoAsync(filePath, token)).Duration.TotalSeconds;
+		}
+
 		foreach (var filePath in entriesEnumerator)
 		{
 			token.ThrowIfCancellationRequested();
 
 			var fileName = Path.GetFileNameWithoutExtension(filePath);
 			var fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
+			var fileType = MediaFileTypes.GetFileType(filePath);
 
-			if (allowedFileExtensions.Contains(fileExtension))
+			if (fileType == MediaFileType.Image || fileType == MediaFileType.Video)
 			{
 				var mimeType = GetMimeType(fileExtension);
 				yield return new FileListEntry
@@ -445,13 +405,13 @@ public class LocalFileSystem : ILocalFileSystem
 					Label = fileName,
 					FileSystemPath = filePath,
 					MediaUrl = BuildApiMediaUrl(filePath, baseHostUri),
-					MediaDuration = mediaDetailsCache.Get<double?>(filePath),
+					MediaDuration = await GetMediaDurationAsync(filePath),
 					MediaType = mimeType,
-					ThumbnailUrl = thumbnailProvider != null ? BuildApiThumbnailUrl(filePath, baseHostUri) : null,
-					ThumbnailType = thumbnailProvider?.ThumbnailMimeType ?? null
+					ThumbnailUrl = BuildApiThumbnailUrl(filePath, baseHostUri),
+					ThumbnailType = thumbnailProvider.ThumbnailMimeType
 				};
 			}
-			else if (allowedConvertableFileExtensions.Contains(fileExtension))
+			else if (fileType == MediaFileType.ImageConvertible)
 			{
 				var mimeType = GetConvertedMimeType(fileExtension);
 				yield return new FileListEntry
@@ -459,10 +419,10 @@ public class LocalFileSystem : ILocalFileSystem
 					Label = fileName,
 					FileSystemPath = filePath,
 					MediaUrl = BuildApiMediaUrl(filePath, baseHostUri),
-					MediaDuration = mediaDetailsCache.Get<double?>(filePath),
+					MediaDuration = await GetMediaDurationAsync(filePath),
 					MediaType = mimeType,
-					ThumbnailUrl = thumbnailProvider != null ? BuildApiThumbnailUrl(filePath, baseHostUri) : null,
-					ThumbnailType = thumbnailProvider?.ThumbnailMimeType ?? null
+					ThumbnailUrl = BuildApiThumbnailUrl(filePath, baseHostUri),
+					ThumbnailType = thumbnailProvider.ThumbnailMimeType
 				};
 			}
 			else if (PlaylistImporter.SupportedFileExtensions.Contains(fileExtension))
@@ -472,45 +432,13 @@ public class LocalFileSystem : ILocalFileSystem
 					Label = fileName,
 					QueryTarget = filePath,
 					FileSystemPath = filePath,
-					Type = FileListEntryType.ChildCollection
+					Type = FileListEntryType.SiblingCollection
 				};
 			}
 		}
-	}
-
-	private async Task UpdateMediaFileDurationCacheAsync(IEnumerable<string> filePaths, CancellationToken token)
-	{
-		if (enableFFProbe)
-		{
-			var updateTasks = new List<Task>(); 
-			foreach (string filePath in filePaths)
-			{
-				string extension = Path.GetExtension(filePath).ToLowerInvariant();
-				if (extension is ".mp4" or ".webm")
-				{
-					updateTasks.Add(Task.Run(() =>
-					{
-						token.ThrowIfCancellationRequested();
-						if (mediaDetailsCache.Get(filePath) == null)
-						{
-							double? duration;
-							try
-							{
-								duration = FFProbe.Analyse(filePath)?.Duration.TotalSeconds ?? null;
-							}
-							catch
-							{
-								duration = null;
-							}
-
-							mediaDetailsCache.Set(filePath, duration);
-						}
-					}, token));
-				}
-			}
-
-			await Task.WhenAll(updateTasks);
-		}
+		
+		logger.LogTrace("Enumerated directory {name} ({start}+{finish}) in {time}ms.",
+			Path.GetFileName(path), start, limit, stopwatch.ElapsedMilliseconds);
 	}
 
 	private string GetMimeType(string filePath)
