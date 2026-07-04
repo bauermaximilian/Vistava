@@ -583,10 +583,12 @@ export class MainApplicationView extends ViewBase {
 
    #handleOnUpdateLoadingIndicator = () => {
       if (this.#logoDot != null && this.#vistavaView != null) {
-         if (this.#logoDot.style.opacity !== "0.5" && this.#isLoading) {
-            this.#logoDot.style.opacity = "0.5";
+const opacityOff = "0";
+         const opacityOn = "1";
+         if (this.#logoDot.style.opacity !== opacityOff && this.#isLoading) {
+            this.#logoDot.style.opacity = opacityOff;
          } else {
-            this.#logoDot.style.opacity = "1";
+            this.#logoDot.style.opacity = opacityOn;
          }
       }
    };
