@@ -49,7 +49,7 @@
       "COPYING"
     ],
     "linux": {
-      "icon": "build/icon.svg",
+      "icon": "build/icons/",
       "category": "Graphics;AudioVideo",
       "mimeTypes": ["inode/directory"],
       "maintainer": "Maximilian Bauer",
