@@ -13,12 +13,17 @@ namespace Vistava.Service;
 
 public static class Program
 {
-    private const string CliFlagHelp = "help";
-    private const string CliFlagPort = "port";
-    private const string CliFlagRandomizeBasePath = "randomizeBasePath";
-    private const string CliFlagPublic = "public";
-    private const string CliFlagAllowCors = "allowCors";
-    private const string CliTrue = "true";
+    private static readonly char[] RandomUrlCharacters;
+
+    static Program()
+    {
+        char[] ambiguousCharacters = ['I', 'l', '1', '0', 'O'];
+        RandomUrlCharacters = Enumerable.Range(65, 25).Select(i => (char)i)
+            .Concat(Enumerable.Range(97, 25).Select(i => (char)i))
+            .Concat(Enumerable.Range(48, 9).Select(i => (char)i))
+            .SkipWhile(c => ambiguousCharacters.Contains(c))
+            .ToArray();
+    }
     
     public static void Main(string[] args)
     {
@@ -28,9 +33,9 @@ public static class Program
 
         var app = BuildApplication(builder, userConfiguration, ConfigureApplicationServices, ConfigureApplication);
 
-        if (args.Any(arg => arg.ToLowerInvariant().TrimStart('/', '-') == "help"))
+        if (args.Any(arg => arg.ToLowerInvariant().TrimStart('/', '-') == ServiceConfiguration.CliFlagHelp))
         {
-            PrintHelp(app.Logger);
+            ServiceConfiguration.PrintHelp(app.Logger);
         }
         else
         {
@@ -38,40 +43,35 @@ public static class Program
         }
     }
 
-    private static void PrintHelp(ILogger logger)
-    {
-        logger.LogInformation(@$"--{CliFlagHelp}: Print this help. 
---{CliFlagPort}=PORT: Accept for HTTP traffic on the specified port.
---{CliFlagRandomizeBasePath}=true: Randomize the application URL root.
---{CliFlagAllowCors}=true: Allow CORS (for any origins).
---{CliFlagPublic}=true: Accept connections from all hosts and not just localhost.");
-    }
-
     private static WebApplication BuildApplication(WebApplicationBuilder builder, 
         IConfiguration userConfiguration, Action<IServiceCollection> configureServices, 
         Action<IApplicationBuilder> configureApplication)
     {
+        var serviceConfiguration = ServiceConfiguration.Parse(userConfiguration);
+        builder.Services.AddSingleton(serviceConfiguration);
+
+        var defaultLogLevel = serviceConfiguration.Debug ? "Debug" : "Information";
+
         builder.Configuration.Sources.Clear();
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>()
         {
-            { "Logging:LogLevel:Default", "Information" },
+            { "Logging:LogLevel:Default", defaultLogLevel },
             { "Logging:LogLevel:Microsoft.AspNetCore", "Warning" },
         });
         
         configureServices(builder.Services);
 
-        string listenerUrl = GenerateListenerUrl(userConfiguration);
+        string listenerUrl = GenerateListenerUrl(serviceConfiguration);
         var kestrelProperties = new KestrelProperties() { Endpoint = listenerUrl };
         builder.Services.AddSingleton(kestrelProperties);
         builder.WebHost.UseKestrel((_, options) => options.Configure(kestrelProperties.Configuration, true));
         
-        string basePath = (userConfiguration[CliFlagRandomizeBasePath]?.ToLowerInvariant() == CliTrue) ?
-            $"/{GenerateRandomString(6)}" : "";
+        string basePath = serviceConfiguration.RandomizeBasePath ? $"/{GenerateRandomString(6)}" : "";
         builder.Services.AddSingleton(new ApplicationParameters(basePath));
 
         var rootApp = builder.Build();
 
-        if (userConfiguration[CliFlagAllowCors]?.ToLowerInvariant().Trim() == CliTrue)
+        if (serviceConfiguration.AllowCors)
         {
             rootApp.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             builder.Services.AddCors();
@@ -125,23 +125,13 @@ public static class Program
         app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 
-    private static string GenerateListenerUrl(IConfiguration configuration)
+    private static string GenerateListenerUrl(ServiceConfiguration configuration)
     {
-        if (!int.TryParse(configuration[CliFlagPort], out int port) || port is <= 0 or > 65535)
-        {
-            port = 0;
-        }
-
-        string host = configuration[CliFlagPublic]?.ToLowerInvariant().Trim() == CliTrue ? 
-            "*" : "127.0.0.1";
-        
-        return $"http://{host}:{port}";
+        return $"http://{(configuration.Public ? "*" : "127.0.0.1")}:{configuration.Port}";
     }
     
     private static string GenerateRandomString(int length)
     {
-        return RandomNumberGenerator.GetString(Enumerable.Range(65, 25).Select(i => (char)i)
-            .Concat(Enumerable.Range(97, 25).Select(i => (char)i))
-            .Concat(Enumerable.Range(48, 9).Select(i => (char)i)).ToArray(), length);
+        return RandomNumberGenerator.GetString(RandomUrlCharacters, length);
     }
 }
