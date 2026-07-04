@@ -82,11 +82,6 @@ public static class Program
             app.UsePathBase(basePath);
             app.UseRouting();
             configureApplication(app);
-
-            #if DEBUG
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            #endif
         });
 
         return rootApp;
@@ -95,12 +90,6 @@ public static class Program
     private static void ConfigureApplicationServices(IServiceCollection services)
     {
         services.AddControllers();
-
-        #if DEBUG
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
-        #endif
-        
         services.AddHostedService<AppEndpointReporter>();
         services.AddSingleton<ILocalFileSystem, LocalFileSystem>();
         services.AddSingleton<MimeTypeProvider>();

@@ -15,10 +15,6 @@
         <DefineConstants>BUILD_ON_WINDOWS</DefineConstants>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(Configuration)'=='Debug'">
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
-    </ItemGroup>
-    
     <ItemGroup>
         <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.14.0" />
         <PackageReference Include="FFMpegCore" Version="5.2.0" />
