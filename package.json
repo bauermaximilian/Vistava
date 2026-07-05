@@ -137,11 +137,13 @@
         "--socket=wayland",
         "--share=ipc",
         "--share=network",
-        "--filesystem=home:r",
+        "--filesystem=home:ro",
+        "--filesystem=/run/udev:ro",
         "--talk-name=org.freedesktop.Notifications",
         "--talk-name=org.kde.StatusNotifierWatcher",
         "--talk-name=com.canonical.AppMenu.Registrar",
         "--device=dri",
+        "--device=input",
         "--socket=pulseaudio"
       ]
     },
