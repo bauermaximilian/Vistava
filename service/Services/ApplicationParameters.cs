@@ -2,4 +2,4 @@
 
 namespace Vistava.Service.Services;
 
-public record ApplicationParameters(string Path);
+public record ApplicationParameters(string BaseUrl, string ExtensionPath);

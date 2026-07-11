@@ -54,7 +54,7 @@ public class FileEntriesController(ApplicationParameters applicationParameters, 
             Scheme = context.Request.Scheme,
             Host = context.Request.Host.Host,
             Port = context.Request.Host.Port ?? 80,
-            Path = applicationParameters.Path.TrimEnd('/') + "/"
+            Path = applicationParameters.BaseUrl.TrimEnd('/') + "/"
         }.Uri;
     }
 }

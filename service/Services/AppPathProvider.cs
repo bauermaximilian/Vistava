@@ -57,7 +57,7 @@ public class AppPathProvider(IServer server, ApplicationParameters appParameters
     {
         Scheme = "http",
         Host = host,
-        Path = appParameters.Path,
+        Path = appParameters.BaseUrl,
         Port = port
     }.Uri;
     

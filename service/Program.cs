@@ -11,17 +11,7 @@ namespace Vistava.Service;
 
 public static class Program
 {
-    private static readonly char[] RandomUrlCharacters;
-
-    static Program()
-    {
-        char[] ambiguousCharacters = ['I', 'l', '1', '0', 'O'];
-        RandomUrlCharacters = Enumerable.Range(65, 25).Select(i => (char)i)
-            .Concat(Enumerable.Range(97, 25).Select(i => (char)i))
-            .Concat(Enumerable.Range(48, 9).Select(i => (char)i))
-            .SkipWhile(c => ambiguousCharacters.Contains(c))
-            .ToArray();
-    }
+    private static readonly char[] RandomUrlCharacters = GenerateNonambiguousCharacterList();
 
     public static void Main(string[] args)
     {
@@ -43,7 +33,7 @@ public static class Program
 
     private static WebApplication BuildApplication(WebApplicationBuilder builder,
         IConfiguration userConfiguration, Action<IServiceCollection> configureServices,
-        Action<IApplicationBuilder> configureApplication)
+        Action<IApplicationBuilder, IFileProvider> configureApplication)
     {
         var serviceConfiguration = ServiceConfiguration.Parse(userConfiguration);
         builder.Services.AddSingleton(serviceConfiguration);
@@ -55,17 +45,23 @@ public static class Program
         {
             { "Logging:LogLevel:Default", defaultLogLevel },
             { "Logging:LogLevel:Microsoft.AspNetCore", "Warning" },
+            { "Logging:LogLevel:Microsoft.Hosting.Lifetime", "Warning" },
+            { "Logging:LogLevel:Microsoft.Extensions.Hosting.Internal.Host", "Information" }
         });
 
         configureServices(builder.Services);
+
+        var extensionsPath = GenerateExtensionsPath();
+        var fileProvider = CreateFileProvider(extensionsPath);
+        builder.Services.AddSingleton(fileProvider);
 
         string listenerUrl = GenerateListenerUrl(serviceConfiguration);
         var kestrelProperties = new KestrelProperties() { Endpoint = listenerUrl };
         builder.Services.AddSingleton(kestrelProperties);
         builder.WebHost.UseKestrel((_, options) => options.Configure(kestrelProperties.Configuration, true));
 
-        string basePath = serviceConfiguration.RandomizeBasePath ? $"/{GenerateRandomString(6)}" : "";
-        builder.Services.AddSingleton(new ApplicationParameters(basePath));
+        string baseUrl = serviceConfiguration.RandomizeBasePath ? $"/{GenerateRandomString(6)}" : "";
+        builder.Services.AddSingleton(new ApplicationParameters(baseUrl, extensionsPath));
 
         var rootApp = builder.Build();
 
@@ -75,11 +71,11 @@ public static class Program
             builder.Services.AddCors();
         }
 
-        rootApp.Map(basePath, app =>
+        rootApp.Map(baseUrl, app =>
         {
-            app.UsePathBase(basePath);
+            app.UsePathBase(baseUrl);
             app.UseRouting();
-            configureApplication(app);
+            configureApplication(app, fileProvider);
         });
 
         return rootApp;
@@ -87,8 +83,11 @@ public static class Program
 
     private static void ConfigureApplicationServices(IServiceCollection services)
     {
-        services.AddControllers();
-        services.AddHostedService<AppEndpointReporter>();
+        services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.WriteIndented = true;
+        });
+        services.AddHostedService<AppInfoReporter>();
         services.AddSingleton<ILocalFileSystem, LocalFileSystem>();
         services.AddSingleton<MimeTypeProvider>();
         services.AddSingleton<AppPathProvider>();
@@ -96,10 +95,8 @@ public static class Program
         services.AddSingleton<IThumbnailProvider, EmbeddedThumbnailProvider>();
     }
 
-    private static void ConfigureApplication(IApplicationBuilder app)
-    {
-        var fileProvider = new ManifestEmbeddedFileProvider(Assembly.GetExecutingAssembly(), "wwwroot");
-
+    private static void ConfigureApplication(IApplicationBuilder app, IFileProvider fileProvider)
+    {       
         var defaultFileOptions = new DefaultFilesOptions();
         defaultFileOptions.DefaultFileNames.Clear();
         defaultFileOptions.DefaultFileNames.Add("index.html");
@@ -115,9 +112,40 @@ public static class Program
         app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 
+    private static IFileProvider CreateFileProvider(string? extensionsPath)
+    {
+        var fileProviders = new List<IFileProvider>
+        {
+            new ManifestEmbeddedFileProvider(Assembly.GetExecutingAssembly(), "wwwroot")
+        };
+
+        if (extensionsPath != null && Directory.Exists(extensionsPath))
+        {
+            fileProviders.Add(new PhysicalFileProvider(extensionsPath));
+        }
+
+        return new CompositeFileProvider([.. fileProviders]);
+    }
+    
+    private static string GenerateExtensionsPath()
+    {
+        var applicationVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "0.0";
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            $"vistava-{applicationVersion}", "extensions");
+    }
+
     private static string GenerateListenerUrl(ServiceConfiguration configuration)
     {
         return $"http://{(configuration.Public ? "*" : "127.0.0.1")}:{configuration.Port}";
+    }
+
+    private static char[] GenerateNonambiguousCharacterList()
+    {
+        char[] ambiguousCharacters = ['I', 'l', '1', '0', 'O'];
+        return [.. Enumerable.Range(65, 25).Select(i => (char)i)
+            .Concat(Enumerable.Range(97, 25).Select(i => (char)i))
+            .Concat(Enumerable.Range(48, 9).Select(i => (char)i))
+            .SkipWhile(c => ambiguousCharacters.Contains(c))];
     }
 
     private static string GenerateRandomString(int length)
