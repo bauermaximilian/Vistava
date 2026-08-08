@@ -105,7 +105,7 @@ public class OptionsController(KestrelProperties kestrelProperties, AppPathProvi
 
         int currentPort = await appPathProvider.GetApplicationPort(4000, HttpContext.RequestAborted);
         string host = isEnabled ? "*" : "127.0.0.1";
-        string newAddress = $"http://{host}:{currentPort}";
+        string newAddress = $"{appPathProvider.Scheme}://{host}:{currentPort}";
         kestrelProperties.Endpoint = newAddress;
         
         logger.LogInformation("Now listening on: {url}", newAddress);

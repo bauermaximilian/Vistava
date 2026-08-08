@@ -2,4 +2,5 @@
 
 namespace Vistava.Service.Services;
 
-public record ApplicationParameters(string BaseUrl, string ExtensionPath);
+public record ApplicationParameters(string Scheme, string BaseUrl, string ExtensionPath,
+   string HttpsCertificatePath);

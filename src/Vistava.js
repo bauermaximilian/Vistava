@@ -37,6 +37,7 @@ export class Vistava {
       }
 
       app.on("window-all-closed", onClosing);
+      app.commandLine.appendSwitch('ignore-certificate-errors');
 
       await app.whenReady();
 

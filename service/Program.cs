@@ -12,6 +12,8 @@ namespace Vistava.Service;
 public static class Program
 {
     private static readonly char[] RandomUrlCharacters = GenerateNonambiguousCharacterList();
+    private const string HttpsCertificateFileName = "https.pfx";
+    private const string ExtensionsDirectoryName = "extensions";
 
     public static void Main(string[] args)
     {
@@ -51,17 +53,29 @@ public static class Program
 
         configureServices(builder.Services);
 
+        var certificatePath = GenerateHttpsCertificatePath();
+        TryLoadOrCreateHttpsCertificate(certificatePath, out var httpsCertificate, out _);
+
         var extensionsPath = GenerateExtensionsPath();
         var fileProvider = CreateFileProvider(extensionsPath);
         builder.Services.AddSingleton(fileProvider);
 
-        string listenerUrl = GenerateListenerUrl(serviceConfiguration);
+        string listenerUrl = GenerateListenerUrl(serviceConfiguration, httpsCertificate != null);
         var kestrelProperties = new KestrelProperties() { Endpoint = listenerUrl };
         builder.Services.AddSingleton(kestrelProperties);
-        builder.WebHost.UseKestrel((_, options) => options.Configure(kestrelProperties.Configuration, true));
+        builder.WebHost.UseKestrel((_, options) => {
+            options.Configure(kestrelProperties.Configuration, true);
+            if (httpsCertificate != null)
+            {
+                options.ConfigureHttpsDefaults(
+                    httpsOptions => httpsOptions.ServerCertificate = httpsCertificate.Certificate);
+            }
+        });
 
         string baseUrl = serviceConfiguration.RandomizeBasePath ? $"/{GenerateRandomString(6)}" : "";
-        builder.Services.AddSingleton(new ApplicationParameters(baseUrl, extensionsPath));
+        var applicationParameters = new ApplicationParameters(
+            httpsCertificate != null ? "https" : "http", baseUrl, extensionsPath, certificatePath);
+        builder.Services.AddSingleton(applicationParameters);
 
         var rootApp = builder.Build();
 
@@ -126,17 +140,64 @@ public static class Program
 
         return new CompositeFileProvider([.. fileProviders]);
     }
-    
+
+    private static bool TryLoadOrCreateHttpsCertificate(string certificatePath,
+        out HttpsCertificate? httpsCertificate, out Exception? httpsCertificateError)
+    {        
+        try
+        {
+            if (File.Exists(certificatePath))
+            {
+                httpsCertificate = HttpsCertificate.Import(certificatePath);
+                if (DateTime.UtcNow < httpsCertificate.Certificate.NotBefore)
+                {
+                    throw new InvalidOperationException($"The certificate is not valid yet.");
+                }
+                if (DateTime.UtcNow > httpsCertificate.Certificate.NotAfter)
+                {
+                    throw new InvalidOperationException("The certificate is not valid anymore.");
+                }
+                httpsCertificateError = null;
+                return true;
+            }
+            else
+            {
+                httpsCertificate = null;
+                httpsCertificateError = new FileNotFoundException("No HTTPS certificate file was found under \"" + 
+                    certificatePath + "\".");
+                return false;
+            }
+        }
+        catch (Exception exc)
+        {
+            httpsCertificate = null;
+            httpsCertificateError = new InvalidOperationException(
+                $"The HTTPS certificate under \"{certificatePath}\" can't be used.", exc);
+            return false;
+        }
+    }
+
     private static string GenerateExtensionsPath()
+    {
+        return Path.Combine(GenerateAppDataPath(), ExtensionsDirectoryName);
+    }
+
+    private static string GenerateHttpsCertificatePath()
+    {
+        return Path.Combine(GenerateAppDataPath(), HttpsCertificateFileName);
+    }
+    
+    private static string GenerateAppDataPath()
     {
         var applicationVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "0.0";
         return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            $"vistava-{applicationVersion}", "extensions");
+            $"vistava-{applicationVersion}");
     }
 
-    private static string GenerateListenerUrl(ServiceConfiguration configuration)
+    private static string GenerateListenerUrl(ServiceConfiguration configuration, bool useHttps)
     {
-        return $"http://{(configuration.Public ? "*" : "127.0.0.1")}:{configuration.Port}";
+        var scheme = useHttps ? "https" : "http";
+        return $"{scheme}://{(configuration.Public ? "*" : "127.0.0.1")}:{configuration.Port}";
     }
 
     private static char[] GenerateNonambiguousCharacterList()

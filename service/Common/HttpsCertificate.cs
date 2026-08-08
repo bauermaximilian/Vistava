@@ -79,6 +79,35 @@ public class HttpsCertificate
 
 		return Encoding.ASCII.GetBytes(builder.ToString());
 	}
+	
+	/// <summary>
+	/// Imports a <see cref="HttpsCertificate"/> from a <c>.cer</c> or <c>.pfx</c> file.
+	/// </summary>
+	/// <param name="path">The path to the certificate file.</param>
+	/// <returns>A new <see cref="HttpsCertificate"/> instance.</returns>
+	/// <exception cref="FileNotFoundException">
+	/// Is thrown when the file under the specified <paramref name="path"/> wasn't found.
+	/// </exception>
+	/// <exception cref="InvalidOperationException">
+	/// Is thrown when the specified certificate file couldn't be imported.
+	/// </exception>
+	public static HttpsCertificate Import(string path)
+	{
+		if (!File.Exists(path))
+		{
+			throw new FileNotFoundException("The specified certificate file wasn't found.");
+		}
+		try
+		{
+			var certificate = X509Certificate.CreateFromCertFile(path);
+			var certificatev2 = new X509Certificate2(certificate);
+			return new HttpsCertificate(certificatev2);
+		}
+		catch (Exception exc)
+		{
+			throw new InvalidOperationException("The certificate couldn't be loaded.", exc);
+		}
+	}
 
 	public static implicit operator X509Certificate2(HttpsCertificate cert)
 	{

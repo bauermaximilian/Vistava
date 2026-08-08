@@ -10,6 +10,8 @@ namespace Vistava.Service.Services;
 public class AppPathProvider(IServer server, ApplicationParameters appParameters)
 {
     private const int AddressTimeoutMs = 5000;
+
+    public string Scheme => appParameters.Scheme;
     
     public async Task<string> GetAppUrlLocal(CancellationToken stoppingToken)
     {
@@ -55,7 +57,7 @@ public class AppPathProvider(IServer server, ApplicationParameters appParameters
 
     private Uri BuildUri(string host, int port) => new UriBuilder
     {
-        Scheme = "http",
+        Scheme = appParameters.Scheme,
         Host = host,
         Path = appParameters.BaseUrl,
         Port = port
