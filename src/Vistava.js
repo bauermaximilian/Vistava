@@ -45,9 +45,29 @@ export class Vistava {
       let urlFragment = "#/";
       try {
          if (argv != null && argv.length > 0) {
-            let entryPath = argv[1].trim();         
-            if (entryPath !== "." && fs.lstatSync(entryPath).isDirectory()) {
-               urlFragment += entryPath;
+            let entryPath = argv[1].trim();
+
+            let sanitizedEntryPath = entryPath;
+            if (sanitizedEntryPath === ".") {
+               sanitizedEntryPath = "";
+            }
+            
+            // If the provided path is a symlink and the application is running on linux, 
+            // append a singular slash so that the symlink can be detected as directory below 
+            // (if it does actually link to a directory - otherwise, isDirectory() will still be false).
+            if (sanitizedEntryPath.length > 0 &&
+               fs.lstatSync(sanitizedEntryPath).isSymbolicLink() &&
+               process.platform === "linux") {
+               sanitizedEntryPath = sanitizedEntryPath + "/";
+            }
+            
+            if (sanitizedEntryPath.length > 0) {
+               if (fs.lstatSync(sanitizedEntryPath).isDirectory()) {
+                  urlFragment += sanitizedEntryPath;
+                  console.log(`Using first argument '${sanitizedEntryPath}' as initial path.`);
+               } else {
+                  console.log(`First argument '${sanitizedEntryPath}' is no existing directory path.`);
+               }
             }
          }
       } catch { }
