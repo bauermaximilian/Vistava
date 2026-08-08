@@ -54,7 +54,7 @@ public static class Program
         configureServices(builder.Services);
 
         var certificatePath = GenerateHttpsCertificatePath();
-        TryLoadOrCreateHttpsCertificate(certificatePath, out var httpsCertificate, out _);
+        TryLoadOrCreateHttpsCertificate(certificatePath, out var httpsCertificate, out var httpsCertificateError);
 
         var extensionsPath = GenerateExtensionsPath();
         var fileProvider = CreateFileProvider(extensionsPath);
@@ -78,6 +78,11 @@ public static class Program
         builder.Services.AddSingleton(applicationParameters);
 
         var rootApp = builder.Build();
+
+        if (httpsCertificateError != null && httpsCertificateError is not FileNotFoundException)
+        {
+            rootApp.Logger.LogError("The HTTPS certificate couldn't be loaded. {error}", httpsCertificateError);
+        }
 
         if (serviceConfiguration.AllowCors)
         {
@@ -149,11 +154,11 @@ public static class Program
             if (File.Exists(certificatePath))
             {
                 httpsCertificate = HttpsCertificate.Import(certificatePath);
-                if (DateTime.UtcNow < httpsCertificate.Certificate.NotBefore)
+                if (DateTime.Now < httpsCertificate.Certificate.NotBefore)
                 {
                     throw new InvalidOperationException($"The certificate is not valid yet.");
                 }
-                if (DateTime.UtcNow > httpsCertificate.Certificate.NotAfter)
+                if (DateTime.Now > httpsCertificate.Certificate.NotAfter)
                 {
                     throw new InvalidOperationException("The certificate is not valid anymore.");
                 }
