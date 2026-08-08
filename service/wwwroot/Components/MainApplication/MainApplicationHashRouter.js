@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { HashRouter } from "../../Dependencies/vistava.js/src/Components/Shared/HashRouter.js";
+import { HashRouter } from "../Shared/HashRouter.js";
 import { Assert } from "../../Dependencies/vistava.js/src/Shared/Assert.js";
 
 export class MainApplicationHashRouter extends HashRouter {
@@ -10,11 +10,11 @@ export class MainApplicationHashRouter extends HashRouter {
    static #detailViewName = "detail";
 
    get directoryPath() {
-      return super.pathname;
+      return super.path;
    }
 
    set directoryPath(value) {
-      super.pathname = value;
+      super.path = value;
    }
 
    /** @type {number?} */

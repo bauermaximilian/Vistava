@@ -41,9 +41,10 @@ export class Vistava {
 
       await app.whenReady();
 
+      let debugMode = argv?.find(arg => arg.toLowerCase().startsWith(cliFlagDebug)) != null;
       let skipFFmpegCheck = argv?.find(arg => arg.toLowerCase().startsWith(cliFlagSkipFFmpegCheck)) != null;
       
-      let urlFragment = "#/";
+      let urlFragment = "#local:";
       try {
          if (argv != null && argv.length > 0) {
             let entryPath = argv[1].trim();
@@ -52,7 +53,7 @@ export class Vistava {
             if (sanitizedEntryPath === ".") {
                sanitizedEntryPath = "";
             }
-            
+
             // If the provided path is a symlink and the application is running on linux, 
             // append a singular slash so that the symlink can be detected as directory below 
             // (if it does actually link to a directory - otherwise, isDirectory() will still be false).
@@ -76,7 +77,7 @@ export class Vistava {
       try {
          vistava = new Vistava();
          
-         await vistava.#service.start(argv?.find(arg => arg.toLowerCase().startsWith(cliFlagDebug)) != null);
+         await vistava.#service.start(debugMode);
          if (vistava.#service.url === null) {
             throw new InvalidOperationError("The service did not provide a valid application URL.");
          }

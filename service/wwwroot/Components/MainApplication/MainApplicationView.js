@@ -2,10 +2,8 @@
 
 import { ViewBase } from "../../Dependencies/vistava.js/src/Components/Shared/ViewBase.js";
 import { MainApplicationHashRouter } from "./MainApplicationHashRouter.js";
-import { SourceFileSystem } from "./Sources/SourceFileSystem.js";
 import { VistavaPresenter } from "../../Dependencies/vistava.js/src/Components/Vistava/VistavaPresenter.js";
 import { VistavaView } from "../../Dependencies/vistava.js/src/Components/Vistava/VistavaView.js";
-import { Source } from "../../Dependencies/vistava.js/src/Shared/Source.js";
 import { ImplementationError } from "../../Dependencies/vistava.js/src/Errors/ImplementationError.js";
 import { TileGridLayoutType } from "../../Dependencies/vistava.js/src/Components/TileGrid/Shared/TileGridLayoutType.js";
 import { VistavaLayoutTypes } from "../../Dependencies/vistava.js/src/Components/Vistava/VistavaLayoutTypes.js";
@@ -15,6 +13,13 @@ import { GuiIconView } from "../../Dependencies/vistava.js/src/Components/GuiIco
 import { GuiIconPresenter } from "../../Dependencies/vistava.js/src/Components/GuiIcon/GuiIconPresenter.js";
 import { AU } from "../../Dependencies/vistava.js/src/Utils/ArrayUtils.js";
 import QrCreator from "../../Dependencies/qr-creator/qr-creator.js";
+import SourceFileSystem from "../../Sources/SourceFileSystem.js";
+import { SourceProvider } from "../Shared/SourceProvider.js";
+import { ContextMenuView } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuView.js";
+import { ContextMenuPresenter } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuPresenter.js";
+import { ContextMenuEntryPresenter } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuEntryPresenter.js";
+import { ContextMenuEntryModel } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuEntryModel.js";
+import { RU } from "../../Dependencies/vistava.js/src/Utils/RectangleUtils.js";
 
 const tagName = "main-application";
 export class MainApplicationView extends ViewBase {
@@ -22,6 +27,8 @@ export class MainApplicationView extends ViewBase {
   
    get showTitleBar() { return this.#showTitleBar; }
    set showTitleBar(value) { this.#showTitleBar = value; }
+
+   get sourceProvider() { return this.#sourceProvider; }
 
    /**
     * @template T
@@ -44,7 +51,7 @@ export class MainApplicationView extends ViewBase {
     */
    
    /** 
-    * @typedef {import("../../Dependencies/vistava.js/src/Components/Shared/HashRouter.js").
+    * @typedef {import("../Shared/HashRouter.js").
     * HashRouterUpdatedEventArgs} HashRouterUpdatedEventArgs
     */
 
@@ -56,9 +63,11 @@ export class MainApplicationView extends ViewBase {
    #iconOpacityHover = "0.8";
    /** @readonly */
    #iconOpacityActivated = "0.6";
+   /** @readonly */
+   #localSourceIdentifier = "local";
 
-   /** @readonly @type {Source} */
-   #source;
+   /** @type {SourceProvider} */
+   #sourceProvider;
    /** @readonly @type {MainApplicationHashRouter} */
    #hashRouter = new MainApplicationHashRouter();
 
@@ -66,7 +75,6 @@ export class MainApplicationView extends ViewBase {
    #showTitleBar = false;
    /** @type {boolean} */
    #sharingEnabled = false;
-
 
    get #shareLinkFull() {
       return (this.#shareLinkBase === null || this.#shareLinkHash === null) ?
@@ -85,9 +93,16 @@ export class MainApplicationView extends ViewBase {
    /** @type {any?} */
    #loadingAnimationIntervalHandle = null;
 
-   /** @type {VistavaPresenter?} */
-   #vistavaPresenter = null;
+   /** @type {ContextMenuEntryPresenter[]} */
+   #contextMenuEntries = [];
 
+   /** @type {ContextMenuPresenter?} */
+   #contextMenuPresenter = null;
+   /** @type {Map<string, VistavaPresenter>} */
+   #vistavaPresenters = new Map();
+
+   /** @type {ContextMenuView?} */
+   #contextMenuView = null;
    /** @type {VistavaView?} */
    #vistavaView = null;
    /** @type {HTMLDivElement?} */
@@ -98,6 +113,8 @@ export class MainApplicationView extends ViewBase {
    #forwardButton = null;
    /** @type {GuiIconView?} */
    #refreshButton = null;
+   /** @type {GuiIconView?} */
+   #extensionsButton = null;
    /** @type {GuiIconView?} */
    #shareToggleButton = null;
    /** @type {GuiIconView?} */
@@ -123,17 +140,14 @@ export class MainApplicationView extends ViewBase {
    
    constructor() {
       super(true);
-      
-      this.#source = new SourceFileSystem({
-         identifier: "local",
+
+      this.#sourceProvider = new SourceProvider(this.#localSourceIdentifier, new SourceFileSystem({
          hostUrl: this.#getApiUrl()
-      });
+      }));
+
       this.#hashRouter.onUpdated.subscribe(this.#handleOnHashUpdated);
       this.#hashRouter.autoUpdateWindowHash = false;
       this.#hashRouter.disableHistoryChanges = true;
-      if (this.#hashRouter.index === null) {
-         this.#hashRouter.index = 0;
-      }
    }
 
    connectedCallback() {
@@ -141,19 +155,24 @@ export class MainApplicationView extends ViewBase {
 
       BrowserUtils.subscribeToFullscreenChange(this.#handleOnFullscreenChange);
 
-      this.#render();
-
-      if (this.#vistavaPresenter !== null) {
-         this.#vistavaPresenter.onFocusUpdated.subscribe(this.#handleOnFocusUpdated);
-         this.#vistavaPresenter.onExtendStateUpdated.subscribe(this.#handleOnExtendStateUpdated);
-      } else {
-         throw new ImplementationError();
+      this.#contextMenuEntries = [];
+      for (let sourceIdentifier of this.#sourceProvider.sourceIdentifiers) {
+         let entryModel = new ContextMenuEntryModel();
+         entryModel.label = this.#sourceProvider.getSourceName(sourceIdentifier);
+         let entry = new ContextMenuEntryPresenter(entryModel);
+         entry.onActivated.subscribe(() => {
+            this.#sourceProvider.changeSource(sourceIdentifier);
+         });
+         this.#contextMenuEntries.push(entry);
       }
+
+      this.#render();
 
       if (this.#vistavaView !== null) {
          this.#vistavaView.onTilePrimaryAction.subscribe(this.#handleOnTilePrimaryAction);
          this.#vistavaView.onQueryChangeRequested.subscribe(this.#handleOnQueryChangeRequested);
          this.#vistavaView.onBack.subscribe(this.#handleOnBack);
+         this.#sourceProvider.onSourceChanged.subscribe(this.#handleOnSourceUpdated);
       } else {
          throw new ImplementationError();
       }
@@ -166,8 +185,7 @@ export class MainApplicationView extends ViewBase {
 
       clearInterval(this.#loadingAnimationIntervalHandle);
 
-      this.#vistavaPresenter?.onFocusUpdated.unsubscribe(this.#handleOnFocusUpdated);
-      this.#vistavaPresenter?.onExtendStateUpdated.unsubscribe(this.#handleOnExtendStateUpdated);
+      this.#sourceProvider.onSourceChanged.unsubscribe(this.#handleOnSourceUpdated);
 
       this.#hashRouter.detach();
    }
@@ -176,9 +194,9 @@ export class MainApplicationView extends ViewBase {
     * @param {string?} query 
     */
    updateQuery(query) {
-      this.#hashRouter.pathname = query ?? "";
+      this.#hashRouter.path = query ?? "";
       this.#hashRouter.index = 0;
-      this.#vistavaPresenter?.updateState({ query: query ?? "", index: 0 });
+      this.#vistavaView?.presenter?.updateState({ query: query ?? "", index: 0 });
       this.#hashRouter.updateWindowHash(false);
    }
 
@@ -266,6 +284,11 @@ export class MainApplicationView extends ViewBase {
             });
          });
 
+         this.#contextMenuView = cu(this.#contextMenuView, ContextMenuView, this.#titleBar, (e, s) => {
+            e.preferAlignmentLeft = true;
+            e.presenter = this.#contextMenuPresenter = new ContextMenuPresenter();
+         });
+
          this.#refreshButton = cu(this.#refreshButton, GuiIconView, this.#titleBar,
             e => this.#initializeToolbarIcon(e, "refresh", () => location.reload(), "Refresh"), 
             e => this.#updateToolbarIcon(e), null, true);
@@ -275,6 +298,21 @@ export class MainApplicationView extends ViewBase {
          this.#backButton = cu(this.#backButton, GuiIconView, this.#titleBar,
             e => this.#initializeToolbarIcon(e, "back", () => history.back(), "Back"), 
             e => this.#updateToolbarIcon(e), null, true);
+         
+         this.#extensionsButton = cu(this.#extensionsButton, GuiIconView, this.#titleBar, (e, s) => {
+            this.#initializeToolbarIcon(e, "extension", () => {
+               if (this.#contextMenuPresenter != null) {
+                  if (!this.#contextMenuPresenter.wasJustClosed()) {
+                     let buttonBounds = e.getBoundingClientRect();
+                     let barBounds = this.#titleBar?.getBoundingClientRect() ?? buttonBounds;
+                     this.#contextMenuPresenter.open(this.#contextMenuEntries,
+                        RU.new(buttonBounds.x, barBounds.y, buttonBounds.width, barBounds.height));
+                  }
+               }
+            });
+            this.#getSetElementAttribute(e, "data-disabled", this.sourceProvider.count <= 1);
+            this.#updateToolbarIcon(e);
+         });
 
          this.#shareLinkButton = cu(this.#shareLinkButton, GuiIconView, this.#titleBar, (e, s) => {
             this.#initializeToolbarIcon(e, "link", this.#handleOnShareLinkClick);
@@ -378,15 +416,32 @@ export class MainApplicationView extends ViewBase {
       }
 
       this.#vistavaView = cu(this.#vistavaView, VistavaView, this.root, (e, s) => {
+         e.onPresenterChanged.subscribe(this.#handleOnVistavaPresenterChanged);
+         if (this.#contextMenuView != null) {
+            e.inputManager.registerInputEventGroup(ContextMenuView, 1);
+            this.#contextMenuView.inputManager = e.inputManager;
+         }
+
+         let layoutTypes = VistavaLayoutTypes.default;
+         e.presenter = new VistavaPresenter(
+            query => this.#sourceProvider.createCollectionRetriever(query),
+            layoutTypes, VU.new(e.clientWidth, e.clientHeight), { query: "" });
+         this.#vistavaPresenters.set(this.#sourceProvider.currentSourceIdentifier, e.presenter);
+            
+         e.layoutTypes = layoutTypes;
          s.flexGrow = "1";
          s.overflow = "hidden";
-         let layoutTypes = VistavaLayoutTypes.default;
-         this.#vistavaPresenter = e.presenter ??= new VistavaPresenter(
-            query => this.#source.createCollectionRetriever(query),
-            layoutTypes, VU.new(e.clientWidth, e.clientHeight), { query: "" });
-         e.layoutTypes = layoutTypes;
       });
    }
+
+   /** @type {EventHandler<import("../../Dependencies/vistava.js/src/Shared/Event.js").ValueChangedEventArgs<VistavaPresenter>>} */
+   #handleOnVistavaPresenterChanged = (args) => {
+      args.oldValue?.onFocusUpdated.unsubscribe(this.#handleOnFocusUpdated);
+      args.oldValue?.onExtendStateUpdated.unsubscribe(this.#handleOnExtendStateUpdated);
+
+      args.newValue?.onFocusUpdated.subscribe(this.#handleOnFocusUpdated);
+      args.newValue?.onExtendStateUpdated.subscribe(this.#handleOnExtendStateUpdated);      
+   };
 
    /**
     * @param {HTMLElement} element 
@@ -457,6 +512,29 @@ export class MainApplicationView extends ViewBase {
       }
    }
 
+   #handleOnSourceUpdated = () => {
+      if (this.#hashRouter.source !== this.#sourceProvider.currentSourceIdentifier) {
+         this.#hashRouter.source = this.#sourceProvider.currentSourceIdentifier;
+         this.#hashRouter.path = "";
+         this.#hashRouter.index = 0;
+      }
+      
+      if (this.#vistavaView == null) {
+         return;
+      }
+      
+      this.#vistavaView.presenter?.reset();
+
+      this.#hashRouter.updateWindowHash(false);
+
+      this.#vistavaView.presenter?.updateState({
+         index: this.#hashRouter.index ?? 0,
+         view: this.#hashRouter.detailViewVisible ?
+            TileGridLayoutType.gallery.identifier : TileGridLayoutType.thumbnails.identifier,
+         query: this.#hashRouter.path
+      });
+   };
+
    #handleOnShareClick = async () => {
       if (!this.#shareClickLocked) {
          this.#shareClickLocked = true;
@@ -520,7 +598,7 @@ export class MainApplicationView extends ViewBase {
          this.#hashRouter.index = model.index;
          this.#hashRouter.updateWindowHash(true);
 
-         this.#vistavaPresenter?.updateState({ view: TileGridLayoutType.gallery.identifier });
+         this.#vistavaView?.presenter?.updateState({ view: TileGridLayoutType.gallery.identifier });
 
          this.#hashRouter.detailViewVisible = true;
          this.#hashRouter.updateWindowHash(false);
@@ -529,7 +607,7 @@ export class MainApplicationView extends ViewBase {
 
    /** @type {EventHandler<VistavaQueryChangeRequestedEventArgs>} */
    #handleOnQueryChangeRequested = (args) => {
-      if (args.query !== this.#vistavaPresenter?.state.query) {
+      if (args.query !== this.#vistavaView?.presenter?.state.query) {
          this.#hashRouter.index = 0;
          this.#hashRouter.updateWindowHash(true);
          this.updateQuery(args.query);
@@ -544,30 +622,40 @@ export class MainApplicationView extends ViewBase {
     * @param {HashRouterUpdatedEventArgs} args 
     */
    #handleOnHashUpdated = (args) => {
-      if (!args.externalOrigin || this.#vistavaPresenter === null) {
+      this.#shareLinkHash = this.#hashRouter.hashPathAndSourceOnly;
+
+      if (!args.externalOrigin || this.#vistavaView?.presenter == null) {
          return;
       }
       
-      let focussedTileIndex = this.#vistavaPresenter.focussedTileIndex;
+      let focussedTileIndex = this.#vistavaView.presenter.focussedTileIndex;
       if (focussedTileIndex !== null && focussedTileIndex !== this.#hashRouter.index &&
-         this.#vistavaPresenter.state.view === TileGridLayoutType.gallery.identifier &&
+         this.#vistavaView.presenter.state.view === TileGridLayoutType.gallery.identifier &&
          !this.#hashRouter.detailViewVisible) {
          this.#hashRouter.index = focussedTileIndex;
          this.#hashRouter.updateWindowHash(true);
       }
 
-      this.#shareLinkHash = this.#hashRouter.hashPathOnly;
-
-      this.#vistavaPresenter.updateState({
+      if (args.sourceUpdated) {
+         if (this.#sourceProvider.hasSource(this.#hashRouter.source)) {
+            this.#sourceProvider.changeSource(this.#hashRouter.source);
+         } else if (this.#hashRouter.source.trim().length === 0) {
+            this.#hashRouter.source = this.#localSourceIdentifier;
+            this.#hashRouter.updateWindowHash(true);
+         } else {
+            console.warn(`No source with the identifier '${this.#hashRouter.source}' exists.`);
+         }
+      }
+      this.#vistavaView.presenter.updateState({
          index: this.#hashRouter.index ?? 0,
          view: this.#hashRouter.detailViewVisible ?
             TileGridLayoutType.gallery.identifier : TileGridLayoutType.thumbnails.identifier,
-         query: this.#hashRouter.pathname
+         query: this.#hashRouter.path
       });
    };
 
    #handleOnFocusUpdated = () => {
-      let focussedTileIndex = this.#vistavaPresenter?.focussedTileIndex ?? null;
+      let focussedTileIndex = this.#vistavaView?.presenter?.focussedTileIndex ?? null;
       if (focussedTileIndex != null && focussedTileIndex !== this.#hashRouter.index) {
          this.#hashRouter.index = focussedTileIndex;
          this.#hashRouter.updateWindowHash(true);
@@ -583,7 +671,7 @@ export class MainApplicationView extends ViewBase {
 
    #handleOnUpdateLoadingIndicator = () => {
       if (this.#logoDot != null && this.#vistavaView != null) {
-const opacityOff = "0";
+         const opacityOff = "0";
          const opacityOn = "1";
          if (this.#logoDot.style.opacity !== opacityOff && this.#isLoading) {
             this.#logoDot.style.opacity = opacityOff;

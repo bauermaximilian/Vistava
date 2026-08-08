@@ -1,26 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { SourceSegmented, SourceSegmentedContentRetriever } from "../../../Dependencies/vistava.js/src/Shared/SourceSegmented.js";
-import { Assert } from "../../../Dependencies/vistava.js/src/Shared/Assert.js";
-import { RateLimiter } from "../../../Dependencies/vistava.js/src/Shared/RateLimiter.js";
-import { TileValue } from "../../../Dependencies/vistava.js/src/Components/TileGrid/Shared/TileValue.js";
-import { ArgumentError } from "../../../Dependencies/vistava.js/src/Errors/ArgumentError.js";
+import { SourceSegmented, SourceSegmentedContentRetriever } from "../Dependencies/vistava.js/src/Shared/SourceSegmented.js";
+import { Assert } from "../Dependencies/vistava.js/src/Shared/Assert.js";
+import { RateLimiter } from "../Dependencies/vistava.js/src/Shared/RateLimiter.js";
+import { TileValue } from "../Dependencies/vistava.js/src/Components/TileGrid/Shared/TileValue.js";
+import { ArgumentError } from "../Dependencies/vistava.js/src/Errors/ArgumentError.js";
 
 /**
  * @typedef {object} AuthenticationFileSystem
  */
 
 /**
- * @typedef {import("../../../Dependencies/vistava.js/src/Shared/Source.js").SourceConfiguration & AdditionalSourceFileSystemConfiguration
+ * @typedef {import("../Dependencies/vistava.js/src/Shared/Source.js").SourceConfiguration & AdditionalSourceFileSystemConfiguration
  * } SourceFileSystemConfiguration
  */
 
-export class SourceFileSystem extends SourceSegmented {
+export default class SourceFileSystem extends SourceSegmented {
    /** 
     * @typedef {object} AdditionalSourceFileSystemConfiguration
     * @property {string} hostUrl
     * @property {AuthenticationFileSystem?} [authentication]
     */
+
+   get name() { return "Local file system"; }
 
    /**  @readonly @type {AuthenticationFileSystem?} */
    #authentication = null;
@@ -67,7 +69,7 @@ export class SourceFileSystem extends SourceSegmented {
 }
 
 class SourceFileSystemContentRetriever extends SourceSegmentedContentRetriever {
-   get pageLength() { return 10; }
+   get pageLength() { return 25; }
 
    /** @readonly @type {RateLimiter} */
    #rateLimiter = new RateLimiter(25);
@@ -105,7 +107,17 @@ class SourceFileSystemContentRetriever extends SourceSegmentedContentRetriever {
          throw new Error(`The API request failed (code ${response.status}).`);
       } else {
          let responseData = await response.json();
-         return responseData?.map(value => value) ?? [];
+         return responseData?.map(value => {
+            // Do not display labels on images
+            if (value.mediaType?.startsWith("image") === true && value.label != null) {
+               value.label = "";
+            }
+            let tileValue = new TileValue({
+               ...value,
+               sourceUrl: value.fileSystemPath
+            });
+            return tileValue;
+         }) ?? [];
       }
    }
 }

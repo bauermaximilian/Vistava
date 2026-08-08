@@ -52,7 +52,7 @@ export class VistavaServiceManager {
                   appUrlCandidate += "/";
                }
                console.log("Local vistava application server started successfully - redirecting output.");
-               this.#url = `${appUrlCandidate}app.html`;
+               this.#url = `${appUrlCandidate}`;
                isResolved = true;
                resolve();
             }

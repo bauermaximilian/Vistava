@@ -23,7 +23,7 @@
          "type": "chrome",
          "request": "launch",
          "name": "Debug app service [Window] (Chrome)",
-         "url": "http://localhost:42069/app.html",
+         "url": "http://localhost:42069/?forceAppBar",
          "webRoot": "${workspaceFolder}/service/wwwroot/",
          "preLaunchTask": "Start app service",
          "postDebugTask": "Terminate app service"
