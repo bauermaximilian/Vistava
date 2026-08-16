@@ -39,4 +39,7 @@ BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, docum
          console.warn(`Couldn't load extension source '${sourceIdentifier}'. ` + error);
       }
    }
+}, async e => {
+   BrowserUtils.tryLoadConfiguration("Configurations/gamepad.json", c => e.importGamepadConfiguration(c));
+   BrowserUtils.tryLoadConfiguration("Configurations/keyboard.json", c => e.importKeyboardConfiguration(c));
 }));

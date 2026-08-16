@@ -20,6 +20,9 @@ import { ContextMenuPresenter } from "../../Dependencies/vistava.js/src/Componen
 import { ContextMenuEntryPresenter } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuEntryPresenter.js";
 import { ContextMenuEntryModel } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuEntryModel.js";
 import { RU } from "../../Dependencies/vistava.js/src/Utils/RectangleUtils.js";
+import { GamepadInputManagerSettings } from "../../Dependencies/vistava.js/src/Components/Shared/UserInput/Gamepad/GamepadInputManagerSettings.js";
+import { InvalidOperationError } from "../../Dependencies/vistava.js/src/Errors/InvalidOperationError.js";
+import { KeyboardInputManagerSettings } from "../../Dependencies/vistava.js/src/Components/Shared/UserInput/KeyboardInputManagerSettings.js";
 
 const tagName = "main-application";
 export class MainApplicationView extends ViewBase {
@@ -198,6 +201,32 @@ export class MainApplicationView extends ViewBase {
       this.#hashRouter.index = 0;
       this.#vistavaView?.presenter?.updateState({ query: query ?? "", index: 0 });
       this.#hashRouter.updateWindowHash(false);
+   }
+
+   /**
+    * @param {object} configurationObject 
+    */
+   importKeyboardConfiguration(configurationObject) {
+      if (this.#vistavaView != null) {
+         this.#vistavaView.inputManager.keyboard.settings =
+            KeyboardInputManagerSettings.fromConfiguration(configurationObject);
+      } else {
+         throw new InvalidOperationError(
+            "The view needs to be connected to the DOM to perform the requested operation.");
+      }
+   }
+
+   /**
+    * @param {object} configurationObject 
+    */
+   importGamepadConfiguration(configurationObject) {
+      if (this.#vistavaView != null) {
+         this.#vistavaView.inputManager.gamepad.settings =
+            GamepadInputManagerSettings.fromConfiguration(configurationObject);
+      } else {
+         throw new InvalidOperationError(
+            "The view needs to be connected to the DOM to perform the requested operation.");
+      }
    }
 
    static initializeDocument() {
@@ -421,16 +450,15 @@ export class MainApplicationView extends ViewBase {
             e.inputManager.registerInputEventGroup(ContextMenuView, 1);
             this.#contextMenuView.inputManager = e.inputManager;
          }
-
+         s.flexGrow = "1";
+         s.overflow = "hidden";
+      }, e => {
          let layoutTypes = VistavaLayoutTypes.default;
          e.presenter = new VistavaPresenter(
             query => this.#sourceProvider.createCollectionRetriever(query),
             layoutTypes, VU.new(e.clientWidth, e.clientHeight), { query: "" });
-         this.#vistavaPresenters.set(this.#sourceProvider.currentSourceIdentifier, e.presenter);
-            
+         this.#vistavaPresenters.set(this.#sourceProvider.currentSourceIdentifier, e.presenter);            
          e.layoutTypes = layoutTypes;
-         s.flexGrow = "1";
-         s.overflow = "hidden";
       });
    }
 
