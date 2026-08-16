@@ -4,7 +4,7 @@ import { MainApplicationView } from "./Components/MainApplication/MainApplicatio
 import { BrowserUtils, cua } from "./Dependencies/vistava.js/src/Utils/BrowserUtils.js";
 import { Assert } from "./Dependencies/vistava.js/src/Shared/Assert.js";
 
-Assert.isActive = false;
+
 MainApplicationView.initializeDocument();
 
 BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, document.body, async e => {
@@ -13,6 +13,14 @@ BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, docum
    urlSearchParams.has("forceAppBar");
 
    e.showTitleBar = showTitleBar;
+
+   try {
+      let serviceInfo = await (await fetch("./api/options/info")).json();
+      Assert.isActive = serviceInfo.debugMode;
+      console.info(`Connected to service version ${serviceInfo.version}${(Assert.isActive ? " (debug mode)" : "")}.`);
+   } catch (error) {
+      console.error("Couldn't retrieve service information!");
+   }   
 
    let sources = {};
    try {

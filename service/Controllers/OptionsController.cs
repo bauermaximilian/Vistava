@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
@@ -12,16 +13,25 @@ namespace Vistava.Service.Controllers;
 [Route(Route)]
 [ApiController]
 public class OptionsController(KestrelProperties kestrelProperties, AppPathProvider appPathProvider,
-    IFileProvider fileProvider, ILogger<OptionsController> logger) : ControllerBase
+    IFileProvider fileProvider, ServiceConfiguration serviceConfiguration,
+    ILogger<OptionsController> logger) : ControllerBase
 {
     public const string Route = "api/options";
     private const string SourceDefinitionSuffix = ".source.json";
 
-    private readonly JsonSerializerOptions sourceDefinitionSerializerOptions = new() 
+    private readonly JsonSerializerOptions sourceDefinitionSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         WriteIndented = true
     };
+
+    [HttpGet("info")]
+    public async Task<ActionResult<ServiceInformation>> GetServiceInformation()
+    {
+        return new ServiceInformation(
+            Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0",
+            serviceConfiguration.Debug);
+    }
 
     [HttpGet("sources")]
     public async Task<ActionResult<IDictionary<string, SourceConfiguration>>> GetSources() 
