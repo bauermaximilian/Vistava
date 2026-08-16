@@ -6,14 +6,13 @@ using Microsoft.Extensions.FileProviders;
 using Vistava.Service.Common;
 using Vistava.Service.Contracts;
 using Vistava.Service.Services;
+using Vistava.Service.Utils;
 
 namespace Vistava.Service;
 
 public static class Program
 {
     private static readonly char[] RandomUrlCharacters = GenerateNonambiguousCharacterList();
-    private const string HttpsCertificateFileName = "https.pfx";
-    private const string ExtensionsDirectoryName = "extensions";
 
     public static void Main(string[] args)
     {
@@ -53,7 +52,7 @@ public static class Program
 
         configureServices(builder.Services);
 
-        var certificatePath = GenerateHttpsCertificatePath();
+        var certificatePath = AppPathsHelper.GenerateHttpsCertificatePath();
         Exception? httpsCertificateError = null;
         HttpsCertificate? httpsCertificate = null;
         if (!serviceConfiguration.DisableHttps)
@@ -61,7 +60,7 @@ public static class Program
             TryLoadOrCreateHttpsCertificate(certificatePath, out httpsCertificate, out httpsCertificateError);
         }
 
-        var extensionsPath = GenerateExtensionsPath();
+        var extensionsPath = AppPathsHelper.GenerateExtensionsPath();
         var fileProvider = CreateFileProvider(extensionsPath);
         builder.Services.AddSingleton(fileProvider);
 
@@ -185,23 +184,6 @@ public static class Program
                 $"The HTTPS certificate under \"{certificatePath}\" can't be used.", exc);
             return false;
         }
-    }
-
-    private static string GenerateExtensionsPath()
-    {
-        return Path.Combine(GenerateAppDataPath(), ExtensionsDirectoryName);
-    }
-
-    private static string GenerateHttpsCertificatePath()
-    {
-        return Path.Combine(GenerateAppDataPath(), HttpsCertificateFileName);
-    }
-    
-    private static string GenerateAppDataPath()
-    {
-        var applicationVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "0.0";
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            $"vistava-{applicationVersion}");
     }
 
     private static string GenerateListenerUrl(ServiceConfiguration configuration, bool useHttps)

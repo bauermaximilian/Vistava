@@ -16,7 +16,7 @@ public class MediaFileInfoProvider
 {
     private readonly ILogger logger;
     private const int PrecacheConcurrencyMaximum = 10;
-    private readonly string ThumbnailCacheConnectionString = Path.Combine(Path.GetTempPath(), "vistava.cache");
+    private readonly string ThumbnailCacheConnectionString = AppPathsHelper.GenerateMediaCachePath();
     private readonly KeyedGeneratorBundle<string, MediaFileInfo> mediaFileInfoLoaders;
     private readonly KeyedGeneratorBundle<string, MediaFileThumbnail> mediaFileThumbnailLoaders;
     private readonly object databaseLock = new();
