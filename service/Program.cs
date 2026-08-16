@@ -54,7 +54,12 @@ public static class Program
         configureServices(builder.Services);
 
         var certificatePath = GenerateHttpsCertificatePath();
-        TryLoadOrCreateHttpsCertificate(certificatePath, out var httpsCertificate, out var httpsCertificateError);
+        Exception? httpsCertificateError = null;
+        HttpsCertificate? httpsCertificate = null;
+        if (!serviceConfiguration.DisableHttps)
+        {
+            TryLoadOrCreateHttpsCertificate(certificatePath, out httpsCertificate, out httpsCertificateError);
+        }
 
         var extensionsPath = GenerateExtensionsPath();
         var fileProvider = CreateFileProvider(extensionsPath);
