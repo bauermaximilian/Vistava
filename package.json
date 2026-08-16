@@ -23,7 +23,7 @@
     "build": "electron-builder -wl",
     "prestart": "npm run prebuild",
     "start": "electron . --debug-mode",
-    "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069 --debug=true"
+    "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069 --debug=true --disableHttps=true"
   },
   "devDependencies": {
     "electron": "^37.3.1",
