@@ -101,8 +101,6 @@ export class MainApplicationView extends ViewBase {
 
    /** @type {ContextMenuPresenter?} */
    #contextMenuPresenter = null;
-   /** @type {Map<string, VistavaPresenter>} */
-   #vistavaPresenters = new Map();
 
    /** @type {ContextMenuView?} */
    #contextMenuView = null;
@@ -169,7 +167,12 @@ export class MainApplicationView extends ViewBase {
          this.#contextMenuEntries.push(entry);
       }
 
-      this.#render();
+      this.style.display = "flex";
+      this.style.flexDirection = "column";
+      this.style.height = "100%";
+
+      this.#tryRenderTitleBar();
+      this.#renderVistava();
 
       if (this.#vistavaView !== null) {
          this.#vistavaView.onTilePrimaryAction.subscribe(this.#handleOnTilePrimaryAction);
@@ -267,11 +270,28 @@ export class MainApplicationView extends ViewBase {
       }
    };
 
-   #render() {
-      this.style.display = "flex";
-      this.style.flexDirection = "column";
-      this.style.height = "100%";
+   #renderVistava() {
+      this.#vistavaView = cu(this.#vistavaView, VistavaView, this.root, (e, s) => {
+         if (this.#contextMenuView != null) {
+            e.inputManager.registerInputEventGroup(ContextMenuView, 1);
+            this.#contextMenuView.inputManager = e.inputManager;
+         }
+         s.flexGrow = "1";
+         s.overflow = "hidden";
+      }, e => {
+         if (e.presenter == null) {
+            let layoutTypes = VistavaLayoutTypes.default;
+            e.presenter = new VistavaPresenter(
+               query => this.#sourceProvider.createCollectionRetriever(query),
+               layoutTypes, VU.new(e.clientWidth, e.clientHeight), { query: "" });
+            e.layoutTypes = layoutTypes;
+            e.presenter.onFocusUpdated.subscribe(this.#handleOnFocusUpdated);
+            e.presenter.onExtendStateUpdated.subscribe(this.#handleOnExtendStateUpdated);    
+         }         
+      });
+   }
 
+   #tryRenderTitleBar() {
       if (this.#showTitleBar) {
          this.#titleBar = cu(this.#titleBar, HTMLDivElement, this.root, (e, s) => {
             s.textAlign = "center";
@@ -443,33 +463,7 @@ export class MainApplicationView extends ViewBase {
             });
          });
       }
-
-      this.#vistavaView = cu(this.#vistavaView, VistavaView, this.root, (e, s) => {
-         e.onPresenterChanged.subscribe(this.#handleOnVistavaPresenterChanged);
-         if (this.#contextMenuView != null) {
-            e.inputManager.registerInputEventGroup(ContextMenuView, 1);
-            this.#contextMenuView.inputManager = e.inputManager;
-         }
-         s.flexGrow = "1";
-         s.overflow = "hidden";
-      }, e => {
-         let layoutTypes = VistavaLayoutTypes.default;
-         e.presenter = new VistavaPresenter(
-            query => this.#sourceProvider.createCollectionRetriever(query),
-            layoutTypes, VU.new(e.clientWidth, e.clientHeight), { query: "" });
-         this.#vistavaPresenters.set(this.#sourceProvider.currentSourceIdentifier, e.presenter);            
-         e.layoutTypes = layoutTypes;
-      });
    }
-
-   /** @type {EventHandler<import("../../Dependencies/vistava.js/src/Shared/Event.js").ValueChangedEventArgs<VistavaPresenter>>} */
-   #handleOnVistavaPresenterChanged = (args) => {
-      args.oldValue?.onFocusUpdated.unsubscribe(this.#handleOnFocusUpdated);
-      args.oldValue?.onExtendStateUpdated.unsubscribe(this.#handleOnExtendStateUpdated);
-
-      args.newValue?.onFocusUpdated.subscribe(this.#handleOnFocusUpdated);
-      args.newValue?.onExtendStateUpdated.subscribe(this.#handleOnExtendStateUpdated);      
-   };
 
    /**
     * @param {HTMLElement} element 
@@ -500,11 +494,11 @@ export class MainApplicationView extends ViewBase {
             
       icon.addEventListener("mouseenter", () => {
          this.#getSetElementAttribute(icon, "data-toggle", true);
-         this.#render();
+         this.#tryRenderTitleBar();
       });
       icon.addEventListener("mouseleave", () => {
          this.#getSetElementAttribute(icon, "data-toggle", false);
-         this.#render();
+         this.#tryRenderTitleBar();
       });
       icon.addEventListener("click", () => {
          if (!this.#getSetElementAttribute(icon, "data-disabled")) {
@@ -585,7 +579,7 @@ export class MainApplicationView extends ViewBase {
 
          } finally {
             this.#shareClickLocked = false;
-            this.#render();
+            this.#tryRenderTitleBar();
          }
       }
    };
