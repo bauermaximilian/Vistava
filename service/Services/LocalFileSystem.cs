@@ -284,7 +284,8 @@ public class LocalFileSystem : ILocalFileSystem
 					MediaType = mimeType,
 					ThumbnailUrl = BuildApiThumbnailUrl(playlistItem.FilePath, baseHostUri),
 					ThumbnailType = MimeTypeProvider.MimeTypeJpeg,
-					FileSystemPath = playlistItem.FilePath
+					FileSystemPath = playlistItem.FilePath,
+					SourceUrl = new Uri(playlistItem.FilePath).AbsoluteUri
 				});
 			}
 		}
@@ -310,7 +311,8 @@ public class LocalFileSystem : ILocalFileSystem
 					Label = drive.Name,
 					QueryTarget = drive.Name,
 					Type = FileListEntryType.ChildCollection,
-					FileSystemPath = drive.Name
+					FileSystemPath = drive.Name,
+					SourceUrl = new Uri($"{drive.Name}:\\").AbsoluteUri
 				};
 			}
 		}
@@ -361,6 +363,7 @@ public class LocalFileSystem : ILocalFileSystem
 				Label = directoryName,
 				QueryTarget = directoryPath,
 				FileSystemPath = directoryPath,
+				SourceUrl = new Uri(directoryPath).AbsoluteUri,
 				Type = FileListEntryType.ChildCollection
 			};
 		}
@@ -404,6 +407,7 @@ public class LocalFileSystem : ILocalFileSystem
 				{
 					Label = fileName,
 					FileSystemPath = filePath,
+					SourceUrl = new Uri(filePath).AbsoluteUri,
 					MediaUrl = BuildApiMediaUrl(filePath, baseHostUri),
 					MediaDuration = await GetMediaDurationAsync(filePath),
 					MediaType = mimeType,
@@ -418,6 +422,7 @@ public class LocalFileSystem : ILocalFileSystem
 				{
 					Label = fileName,
 					FileSystemPath = filePath,
+					SourceUrl = new Uri(filePath).AbsoluteUri,
 					MediaUrl = BuildApiMediaUrl(filePath, baseHostUri),
 					MediaDuration = await GetMediaDurationAsync(filePath),
 					MediaType = mimeType,
@@ -432,6 +437,7 @@ public class LocalFileSystem : ILocalFileSystem
 					Label = fileName,
 					QueryTarget = filePath,
 					FileSystemPath = filePath,
+					SourceUrl = new Uri(filePath).AbsoluteUri,
 					Type = FileListEntryType.SiblingCollection
 				};
 			}

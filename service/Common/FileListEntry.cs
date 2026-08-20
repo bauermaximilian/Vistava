@@ -13,8 +13,6 @@ public class FileListEntry
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public FileListEntryType Type { get; init; }
 
-    public string? IconName { get; init; }
-
     public string? MediaUrl { get; init; }
 
     public double? MediaDuration { get; init; }
@@ -26,4 +24,6 @@ public class FileListEntry
     public string? ThumbnailType { get; init; }
 
     public string? FileSystemPath { get; init; }
+    
+    public string? SourceUrl { get; init; }
 }

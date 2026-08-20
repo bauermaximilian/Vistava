@@ -112,11 +112,8 @@ class SourceFileSystemContentRetriever extends SourceSegmentedContentRetriever {
             if (value.mediaType?.startsWith("image") === true && value.label != null) {
                value.label = "";
             }
-            let tileValue = new TileValue({
-               ...value,
-               sourceUrl: value.fileSystemPath
-            });
-            return tileValue;
+            
+            return value;
          }) ?? [];
       }
    }
