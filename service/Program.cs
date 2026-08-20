@@ -60,9 +60,9 @@ public static class Program
             TryLoadOrCreateHttpsCertificate(certificatePath, out httpsCertificate, out httpsCertificateError);
         }
 
-        var extensionsPath = AppPathsHelper.GenerateExtensionsPath();
-        var fileProvider = CreateFileProvider(extensionsPath);
-        builder.Services.AddSingleton(fileProvider);
+        var includePath = AppPathsHelper.GenerateIncludePath();
+        var includeFileProvider = CreateFileProvider(includePath);
+        builder.Services.AddSingleton(includeFileProvider);
 
         string listenerUrl = GenerateListenerUrl(serviceConfiguration, httpsCertificate != null);
         var kestrelProperties = new KestrelProperties() { Endpoint = listenerUrl };
@@ -78,10 +78,23 @@ public static class Program
 
         string baseUrl = serviceConfiguration.RandomizeBasePath ? $"/{GenerateRandomString(6)}" : "";
         var applicationParameters = new ApplicationParameters(
-            httpsCertificate != null ? "https" : "http", baseUrl, extensionsPath, certificatePath);
+            httpsCertificate != null ? "https" : "http", baseUrl, includePath, certificatePath);
         builder.Services.AddSingleton(applicationParameters);
 
         var rootApp = builder.Build();
+
+        try
+        {
+            if (!Directory.Exists(includePath))
+            {
+                Directory.CreateDirectory(includePath);
+            }
+        }
+        catch (Exception exc)
+        {
+            rootApp.Logger.LogError("The include directory under \"{path}\" couldn't be created. {error}",
+            includePath, exc);
+        }
 
         if (httpsCertificateError != null && httpsCertificateError is not FileNotFoundException)
         {
@@ -98,7 +111,7 @@ public static class Program
         {
             app.UsePathBase(baseUrl);
             app.UseRouting();
-            configureApplication(app, fileProvider);
+            configureApplication(app, includeFileProvider);
         });
 
         return rootApp;

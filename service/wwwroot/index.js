@@ -17,6 +17,7 @@ BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, docum
    try {
       let serviceInfo = await (await fetch("./api/options/info")).json();
       Assert.isActive = serviceInfo.debugMode;
+      e.includePathUrl = serviceInfo.includeFolderUrl ?? null;
       console.info(`Connected to service version ${serviceInfo.version}${(Assert.isActive ? " (debug mode)" : "")}.`);
    } catch (error) {
       console.error("Couldn't retrieve service information!");
@@ -40,6 +41,6 @@ BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, docum
       }
    }
 }, async e => {
-   BrowserUtils.tryLoadConfiguration("Configurations/gamepad.json", c => e.importGamepadConfiguration(c));
-   BrowserUtils.tryLoadConfiguration("Configurations/keyboard.json", c => e.importKeyboardConfiguration(c));
+   BrowserUtils.tryLoadConfiguration("./api/options/config/gamepad.json", c => e.importGamepadConfiguration(c));
+   BrowserUtils.tryLoadConfiguration("./api/options/config/keyboard.json", c => e.importKeyboardConfiguration(c));
 }));

@@ -21,7 +21,7 @@ public class AppInfoReporter(AppPathProvider pathProvider, ApplicationParameters
                 applicationParameters.HttpsCertificatePath);
         }
 
-        logger.LogInformation("Using '{path}' for loading application extensions.",
-            applicationParameters.ExtensionPath);
+        logger.LogInformation("Using '{path}' for loading application includes.",
+            applicationParameters.IncludePath);
     }
 }

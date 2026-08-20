@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Vistava.Service.Common;
 using Vistava.Service.Services;
+using Vistava.Service.Utils;
 
 namespace Vistava.Service.Controllers;
 
@@ -25,11 +26,40 @@ public class OptionsController(KestrelProperties kestrelProperties, AppPathProvi
         WriteIndented = true
     };
 
+    [HttpGet("config/{filename}")]
+    public async Task<ActionResult<string>> GetConfiguration(string filename)
+    {
+        var configurationDirectoryContents = fileProvider.GetDirectoryContents(
+            AppPathsHelper.ConfigurationsDirectoryName);
+        if (configurationDirectoryContents.Exists)
+        {
+            var requestedFile = configurationDirectoryContents.FirstOrDefault(
+                file => file.Name == filename);
+            try
+            {
+                if (requestedFile != null)
+                {
+                    using var stream = requestedFile.CreateReadStream();
+                    using var streamReader = new StreamReader(stream);
+                    return await streamReader.ReadToEndAsync();
+                }
+            }
+            catch
+            {
+                // If the file can't be read, return "null" (just as if the file wasn't found).
+            }
+        }
+
+        // Return the string "null", which is valid JSON (to avoid 404 errors).
+        return "null";
+    }
+
     [HttpGet("info")]
     public async Task<ActionResult<ServiceInformation>> GetServiceInformation()
     {
         return new ServiceInformation(
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0",
+            IsLocalRequest() ? new Uri(AppPathsHelper.GenerateIncludePath()).AbsoluteUri : null,
             serviceConfiguration.Debug);
     }
 

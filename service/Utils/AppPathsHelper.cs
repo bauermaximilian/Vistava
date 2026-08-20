@@ -8,11 +8,12 @@ public static class AppPathsHelper
 {
    public const string HttpsCertificateFileName = "https.pfx";
    public const string MediaCacheFileName = "cache.temp";
-   public const string ExtensionsDirectoryName = "extensions";
+   public const string IncludeDirectoryName = "include";
+   public const string ConfigurationsDirectoryName = "Configurations";
 
-   public static string GenerateExtensionsPath()
+   public static string GenerateIncludePath()
    {
-      return Path.Combine(GenerateAppDataPath(), ExtensionsDirectoryName);
+      return Path.Combine(GenerateAppDataPath(), IncludeDirectoryName);
    }
 
    public static string GenerateHttpsCertificatePath()
@@ -29,6 +30,6 @@ public static class AppPathsHelper
    {
       var applicationVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "0.0";
       return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-          $"vistava-{applicationVersion}");
+         "vistava", "Service", $"v{applicationVersion}");
    }
 }

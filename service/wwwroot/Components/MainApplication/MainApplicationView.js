@@ -32,6 +32,9 @@ export class MainApplicationView extends ViewBase {
    set showTitleBar(value) { this.#showTitleBar = value; }
 
    get sourceProvider() { return this.#sourceProvider; }
+   
+   get includePathUrl() { return this.#includePathUrl; }
+   set includePathUrl(value) { this.#includePathUrl = value; }
 
    /**
     * @template T
@@ -78,6 +81,8 @@ export class MainApplicationView extends ViewBase {
    #showTitleBar = false;
    /** @type {boolean} */
    #sharingEnabled = false;
+   /** @type {string?} */
+   #includePathUrl = null;
 
    get #shareLinkFull() {
       return (this.#shareLinkBase === null || this.#shareLinkHash === null) ?
