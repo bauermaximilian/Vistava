@@ -104,9 +104,12 @@ export class Vistava {
          }
 
          await vistava.#window.show(`${vistava.#service.url}${urlFragment}`);
+         if (debugMode) {
+            vistava.#window.openDevTools();
+         }
       } catch (error) {
          if (vistava == null) {
-            dialog.showErrorBox("Initialization failed", "The application couldn't be initialized properly.");
+            dialog.showErrorBox("Initialization failed", "The application couldn't be initialized properly.\n" + error);
          }
          else if (error instanceof MissingDependenciesError) {
             dialog.showErrorBox("Missing dependencies",

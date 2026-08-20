@@ -180,7 +180,8 @@ export class MainApplicationView extends ViewBase {
       this.#renderVistava();
 
       if (this.#vistavaView !== null) {
-         this.#vistavaView.onTilePrimaryAction.subscribe(this.#handleOnTilePrimaryAction);
+         this.#vistavaView.onTileActivate.subscribe(this.#handleOnTileActivate);
+         this.#vistavaView.onTilePopup.subscribe(this.#handleOnTilePopup);
          this.#vistavaView.onQueryChangeRequested.subscribe(this.#handleOnQueryChangeRequested);
          this.#vistavaView.onBack.subscribe(this.#handleOnBack);
          this.#sourceProvider.onSourceChanged.subscribe(this.#handleOnSourceUpdated);
@@ -363,8 +364,13 @@ export class MainApplicationView extends ViewBase {
                         RU.new(buttonBounds.x, barBounds.y, buttonBounds.width, barBounds.height));
                   }
                }
-            });
+            }, "Available media source extensions");
             this.#getSetElementAttribute(e, "data-disabled", this.sourceProvider.count <= 1);
+            e.addEventListener("auxclick", () => {
+               if (this.#includePathUrl != null && this.#includePathUrl.length > 0) {
+                  this.#tryOpenUrlAsPopup(this.#includePathUrl);
+               }
+            });
             this.#updateToolbarIcon(e);
          });
 
@@ -517,6 +523,19 @@ export class MainApplicationView extends ViewBase {
    }
 
    /**
+    * @param {string} url 
+    */
+   #tryOpenUrlAsPopup(url) {
+      if ("vistavaBridge" in window && typeof (window.vistavaBridge) === "object" &&
+         window.vistavaBridge != null && "openUrl" in window.vistavaBridge &&
+         typeof (window.vistavaBridge.openUrl) === "function") {
+         window.vistavaBridge.openUrl(url);
+      } else if (!url.startsWith("file:")) {
+         window.open(url, '_blank')?.focus();
+      }
+   }
+
+   /**
     * @param {GuiIconView} icon 
     */
    #updateToolbarIcon(icon) {
@@ -612,7 +631,7 @@ export class MainApplicationView extends ViewBase {
    };
 
    /** @type {EventHandler<TileActionEventArgs>} */
-   #handleOnTilePrimaryAction = (args) => {
+   #handleOnTileActivate = (args) => {
       let model = args.tile.presenter?.model;
       if (model == null) { return; }
 
@@ -629,6 +648,14 @@ export class MainApplicationView extends ViewBase {
 
          this.#hashRouter.detailViewVisible = true;
          this.#hashRouter.updateWindowHash(false);
+      }
+   };
+
+   /** @type {EventHandler<TileActionEventArgs>} */
+   #handleOnTilePopup = (args) => {
+      let sourceUrl = args.tile.presenter?.model.getData("sourceUrl") ?? null;
+      if (sourceUrl !== "") {
+         this.#tryOpenUrlAsPopup(sourceUrl);
       }
    };
 

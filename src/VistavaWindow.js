@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { BrowserWindow, dialog, screen } from "electron";
+import { fileURLToPath } from "url";
+import path from "path";
 
 export class VistavaWindow {
    /** @type {BrowserWindow} */
@@ -18,7 +20,11 @@ export class VistavaWindow {
             height: 36
          },
          width, height, x, y,
-         show: false
+         show: false,
+         webPreferences: {
+            preload: path.join(path.dirname(fileURLToPath(import.meta.url)), "VistavaBridge.js"),
+            nodeIntegration: true
+         }
       });
       this.#window.on("close", this.#handleOnClose);
    }
@@ -34,6 +40,10 @@ export class VistavaWindow {
 
    close() {
       this.#window.close();
+   }
+
+   openDevTools() {
+      this.#window?.webContents.openDevTools();
    }
 
    /**
