@@ -3,7 +3,6 @@
 import { SourceSegmented, SourceSegmentedContentRetriever } from "../Dependencies/vistava.js/src/Shared/SourceSegmented.js";
 import { Assert } from "../Dependencies/vistava.js/src/Shared/Assert.js";
 import { RateLimiter } from "../Dependencies/vistava.js/src/Shared/RateLimiter.js";
-import { TileValue } from "../Dependencies/vistava.js/src/Components/TileGrid/Shared/TileValue.js";
 import { ArgumentError } from "../Dependencies/vistava.js/src/Errors/ArgumentError.js";
 
 /**
@@ -93,7 +92,7 @@ class SourceFileSystemContentRetriever extends SourceSegmentedContentRetriever {
    /**
     * @override
     * @param {number} page 
-    * @returns {Promise<TileValue[]>}
+    * @returns {Promise<object[]>}
     */
    async getPageTilesAsync(page) {
       let path = encodeURIComponent(this.query ?? "");
@@ -106,15 +105,7 @@ class SourceFileSystemContentRetriever extends SourceSegmentedContentRetriever {
       if (!response.ok) {
          throw new Error(`The API request failed (code ${response.status}).`);
       } else {
-         let responseData = await response.json();
-         return responseData?.map(value => {
-            // Do not display labels on images
-            if (value.mediaType?.startsWith("image") === true && value.label != null) {
-               value.label = "";
-            }
-            
-            return value;
-         }) ?? [];
+         return await response.json();
       }
    }
 }

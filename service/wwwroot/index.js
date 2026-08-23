@@ -3,9 +3,20 @@
 import { MainApplicationView } from "./Components/MainApplication/MainApplicationView.js";
 import { BrowserUtils, cua } from "./Dependencies/vistava.js/src/Utils/BrowserUtils.js";
 import { Assert } from "./Dependencies/vistava.js/src/Shared/Assert.js";
+import { GlobalConfiguration } from "./Dependencies/vistava.js/src/Shared/GlobalConfiguration.js";
+import { GamepadInputManagerSettings } from "./Dependencies/vistava.js/src/Components/Shared/UserInput/Gamepad/GamepadInputManagerSettings.js";
+import { KeyboardInputManagerSettings } from "./Dependencies/vistava.js/src/Components/Shared/UserInput/KeyboardInputManagerSettings.js";
+import { TileGridSettings } from "./Dependencies/vistava.js/src/Shared/TileGridSettings.js";
 
 
 MainApplicationView.initializeDocument();
+
+await BrowserUtils.tryLoadConfiguration("./api/options/config/gamepad.json",
+   c => GlobalConfiguration.gamepadSettings = GamepadInputManagerSettings.fromConfiguration(c));
+await BrowserUtils.tryLoadConfiguration("./api/options/config/keyboard.json",
+   c => GlobalConfiguration.keyboardSettings = KeyboardInputManagerSettings.fromConfiguration(c));
+await BrowserUtils.tryLoadConfiguration("./api/options/config/tilegrid.json",
+   c => GlobalConfiguration.tileGridSettings = TileGridSettings.fromConfiguration(c));
 
 BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, document.body, async e => {
    let urlSearchParams = new URL(location.href).searchParams;
@@ -40,7 +51,4 @@ BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, docum
          console.warn(`Couldn't load extension source '${sourceIdentifier}'. ` + error);
       }
    }
-}, async e => {
-   BrowserUtils.tryLoadConfiguration("./api/options/config/gamepad.json", c => e.importGamepadConfiguration(c));
-   BrowserUtils.tryLoadConfiguration("./api/options/config/keyboard.json", c => e.importKeyboardConfiguration(c));
 }));
