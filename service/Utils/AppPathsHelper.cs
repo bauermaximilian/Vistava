@@ -9,11 +9,26 @@ public static class AppPathsHelper
    public const string HttpsCertificateFileName = "https.pfx";
    public const string MediaCacheFileName = "cache.temp";
    public const string IncludeDirectoryName = "include";
+   public const string ConfigurationKeyboardFileName = "keyboard.json";
+   public const string ConfigurationGamepadFileName = "gamepad.json";
+   public const string ConfigurationApplicationFileName = "tilegrid.json";
    public const string ConfigurationsDirectoryName = "Configurations";
+   public const string SourcesDirectoryName = "Sources";
+   public const string DefaultConfigurationsDirectoryUrl = "/Dependencies/vistava.js/src/Shared/Configurations/";
 
    public static string GenerateIncludePath()
    {
       return Path.Combine(GenerateAppDataPath(), IncludeDirectoryName);
+   }
+
+   public static string GenerateConfigurationsIncludePath()
+   {
+      return Path.Combine(GenerateIncludePath(), ConfigurationsDirectoryName);
+   }
+
+   public static string GenerateSourcesIncludePath()
+   {
+      return Path.Combine(GenerateIncludePath(), ConfigurationsDirectoryName);
    }
 
    public static string GenerateHttpsCertificatePath()

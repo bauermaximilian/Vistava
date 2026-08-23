@@ -61,8 +61,8 @@ public static class Program
         }
 
         var includePath = AppPathsHelper.GenerateIncludePath();
-        var includeFileProvider = CreateFileProvider(includePath);
-        builder.Services.AddSingleton(includeFileProvider);
+        var combinedFileProvider = CreateFileProvider(includePath);
+        builder.Services.AddSingleton(combinedFileProvider);
 
         string listenerUrl = GenerateListenerUrl(serviceConfiguration, httpsCertificate != null);
         var kestrelProperties = new KestrelProperties() { Endpoint = listenerUrl };
@@ -85,15 +85,11 @@ public static class Program
 
         try
         {
-            if (!Directory.Exists(includePath))
-            {
-                Directory.CreateDirectory(includePath);
-            }
+            CreateAndPopulateAppdataDirectories(combinedFileProvider);
         }
         catch (Exception exc)
         {
-            rootApp.Logger.LogError("The include directory under \"{path}\" couldn't be created. {error}",
-            includePath, exc);
+            rootApp.Logger.LogError("The application data couldn't be initialized. {error}", exc);
         }
 
         if (httpsCertificateError != null && httpsCertificateError is not FileNotFoundException)
@@ -111,7 +107,7 @@ public static class Program
         {
             app.UsePathBase(baseUrl);
             app.UseRouting();
-            configureApplication(app, includeFileProvider);
+            configureApplication(app, combinedFileProvider);
         });
 
         return rootApp;
@@ -155,7 +151,7 @@ public static class Program
             new ManifestEmbeddedFileProvider(Assembly.GetExecutingAssembly(), "wwwroot")
         };
 
-        if (extensionsPath != null && Directory.Exists(extensionsPath))
+        if (extensionsPath != null)
         {
             fileProviders.Add(new PhysicalFileProvider(extensionsPath));
         }
@@ -165,7 +161,7 @@ public static class Program
 
     private static bool TryLoadOrCreateHttpsCertificate(string certificatePath,
         out HttpsCertificate? httpsCertificate, out Exception? httpsCertificateError)
-    {        
+    {
         try
         {
             if (File.Exists(certificatePath))
@@ -185,7 +181,7 @@ public static class Program
             else
             {
                 httpsCertificate = null;
-                httpsCertificateError = new FileNotFoundException("No HTTPS certificate file was found under \"" + 
+                httpsCertificateError = new FileNotFoundException("No HTTPS certificate file was found under \"" +
                     certificatePath + "\".");
                 return false;
             }
@@ -196,6 +192,61 @@ public static class Program
             httpsCertificateError = new InvalidOperationException(
                 $"The HTTPS certificate under \"{certificatePath}\" can't be used.", exc);
             return false;
+        }
+    }
+    
+    private static void CreateAndPopulateAppdataDirectories(IFileProvider applicationFilesProvider)
+    {
+        string configurationsPath = AppPathsHelper.GenerateConfigurationsIncludePath();
+        try
+        {
+            if (!Directory.Exists(configurationsPath))
+            {
+                Directory.CreateDirectory(configurationsPath);
+            }
+        }
+        catch (Exception exc)
+        {
+            throw new InvalidOperationException("The directory for configurations couldn't be created " +
+                $"under \"{configurationsPath}\".", exc);
+        }
+
+        var configurationFilesNames = new List<string>() { AppPathsHelper.ConfigurationKeyboardFileName,
+            AppPathsHelper.ConfigurationGamepadFileName, AppPathsHelper.ConfigurationApplicationFileName };
+
+        foreach (var configurationFileName in configurationFilesNames)
+        {
+            var targetFilePath = Path.Combine(configurationsPath, configurationFileName);
+            try
+            {
+                if (!File.Exists(targetFilePath))
+                {
+                    var sourceFileInfo = applicationFilesProvider.GetFileInfo(
+                        AppPathsHelper.DefaultConfigurationsDirectoryUrl + configurationFileName);
+                    using var sourceFileStream = sourceFileInfo.CreateReadStream();
+                    using var targetFileStream = File.Create(targetFilePath);
+                    sourceFileStream.CopyTo(targetFileStream);
+                }
+            }
+            catch (Exception exc)
+            {
+                throw new InvalidOperationException("The default configuration file under \"" +
+                    targetFilePath + "\" couldn't be created.", exc);
+            }
+        }
+
+        string sourcesPath = AppPathsHelper.GenerateSourcesIncludePath();
+        try
+        {
+            if (!Directory.Exists(sourcesPath))
+            {
+                Directory.CreateDirectory(sourcesPath);
+            }
+        }
+        catch (Exception exc)
+        {
+            throw new InvalidOperationException("The directory for sources couldn't be created " +
+                $"under \"{configurationsPath}\".", exc);
         }
     }
 
