@@ -15,14 +15,13 @@ import { AU } from "../../Dependencies/vistava.js/src/Utils/ArrayUtils.js";
 import QrCreator from "../../Dependencies/qr-creator/qr-creator.js";
 import SourceFileSystem from "../../Sources/SourceFileSystem.js";
 import { SourceProvider } from "../Shared/SourceProvider.js";
-import { ContextMenuView } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuView.js";
-import { ContextMenuPresenter } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuPresenter.js";
 import { ContextMenuEntryPresenter } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuEntryPresenter.js";
 import { ContextMenuEntryModel } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenuEntryModel.js";
 import { RU } from "../../Dependencies/vistava.js/src/Utils/RectangleUtils.js";
 import { GamepadInputManagerSettings } from "../../Dependencies/vistava.js/src/Components/Shared/UserInput/Gamepad/GamepadInputManagerSettings.js";
 import { InvalidOperationError } from "../../Dependencies/vistava.js/src/Errors/InvalidOperationError.js";
 import { KeyboardInputManagerSettings } from "../../Dependencies/vistava.js/src/Components/Shared/UserInput/KeyboardInputManagerSettings.js";
+import { ContextMenu } from "../../Dependencies/vistava.js/src/Components/ContextMenu/ContextMenu.js";
 
 const tagName = "main-application";
 export class MainApplicationView extends ViewBase {
@@ -104,11 +103,6 @@ export class MainApplicationView extends ViewBase {
    /** @type {ContextMenuEntryPresenter[]} */
    #contextMenuEntries = [];
 
-   /** @type {ContextMenuPresenter?} */
-   #contextMenuPresenter = null;
-
-   /** @type {ContextMenuView?} */
-   #contextMenuView = null;
    /** @type {VistavaView?} */
    #vistavaView = null;
    /** @type {HTMLDivElement?} */
@@ -278,10 +272,6 @@ export class MainApplicationView extends ViewBase {
 
    #renderVistava() {
       this.#vistavaView = cu(this.#vistavaView, VistavaView, this.root, (e, s) => {
-         if (this.#contextMenuView != null) {
-            e.inputManager.registerInputEventGroup(ContextMenuView, 1);
-            this.#contextMenuView.inputManager = e.inputManager;
-         }
          s.flexGrow = "1";
          s.overflow = "hidden";
       }, e => {
@@ -339,11 +329,6 @@ export class MainApplicationView extends ViewBase {
             });
          });
 
-         this.#contextMenuView = cu(this.#contextMenuView, ContextMenuView, this.#titleBar, (e, s) => {
-            e.preferAlignmentLeft = true;
-            e.presenter = this.#contextMenuPresenter = new ContextMenuPresenter();
-         });
-
          this.#refreshButton = cu(this.#refreshButton, GuiIconView, this.#titleBar,
             e => this.#initializeToolbarIcon(e, "refresh", () => location.reload(), "Refresh"), 
             e => this.#updateToolbarIcon(e), null, true);
@@ -356,13 +341,12 @@ export class MainApplicationView extends ViewBase {
          
          this.#extensionsButton = cu(this.#extensionsButton, GuiIconView, this.#titleBar, (e, s) => {
             this.#initializeToolbarIcon(e, "extension", () => {
-               if (this.#contextMenuPresenter != null) {
-                  if (!this.#contextMenuPresenter.wasJustClosed()) {
-                     let buttonBounds = e.getBoundingClientRect();
-                     let barBounds = this.#titleBar?.getBoundingClientRect() ?? buttonBounds;
-                     this.#contextMenuPresenter.open(this.#contextMenuEntries,
-                        RU.new(buttonBounds.x, barBounds.y, buttonBounds.width, barBounds.height));
-                  }
+               if (!ContextMenu.wasJustClosed) {
+                  let buttonBounds = e.getBoundingClientRect();
+                  let barBounds = this.#titleBar?.getBoundingClientRect() ?? buttonBounds;
+                  ContextMenu.preferAlignmentLeft = true;
+                  ContextMenu.open(this.#contextMenuEntries,
+                     RU.new(buttonBounds.x, barBounds.y, buttonBounds.width, barBounds.height));
                }
             }, "Available media source extensions");
             this.#getSetElementAttribute(e, "data-disabled", this.sourceProvider.count <= 1);
@@ -373,7 +357,6 @@ export class MainApplicationView extends ViewBase {
             });
             this.#updateToolbarIcon(e);
          });
-
          this.#shareLinkButton = cu(this.#shareLinkButton, GuiIconView, this.#titleBar, (e, s) => {
             this.#initializeToolbarIcon(e, "link", this.#handleOnShareLinkClick);
             e.addEventListener("mouseenter", () => {
