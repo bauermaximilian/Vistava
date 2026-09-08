@@ -1,8 +1,8 @@
 {
   "name": "vistava",
   "desktopName": "com.bauermaximilian.vistava",
-  "version": "1.0.0-beta.3",
-  "description": "A no-nonsense media file browser",
+  "version": "1.0.0-beta.4",
+  "description": "A no-nonsense media browser",
   "license": "GPL-3.0-or-later",
   "author": "Maximilian Bauer",
   "homepage": "https://vistava.net",
@@ -13,7 +13,6 @@
   "type": "module",
   "main": "src/Vistava.js",
   "scripts": {
-    "preinstall": "node ./src/DotNetChecker.js --check-sdk",
     "prebuild:windows": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Windows",
     "prebuild:linux": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Linux",
     "prebuild": "npm run prebuild:windows && npm run prebuild:linux",
@@ -26,7 +25,7 @@
     "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069 --debug=true --disableHttps=true"
   },
   "devDependencies": {
-    "electron": "^37.3.1",
+    "electron": "^44.3.0",
     "electron-builder": "^26.15.3"
   },
   "build": {
@@ -128,7 +127,9 @@
             "--disable-static",
             "--disable-doc",
             "--enable-shared",
-            "--disable-ffplay"
+            "--disable-ffplay",
+            "--disable-nvenc",
+            "--disable-debug"
           ]
         }
       ],
@@ -149,7 +150,7 @@
     },
     "win": {
       "target": [
-        "zip", 
+        "zip",
         "nsis"
       ],
       "icon": "build/icon.ico"
