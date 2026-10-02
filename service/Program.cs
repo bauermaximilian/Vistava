@@ -24,7 +24,7 @@ public static class Program
 
         if (args.Any(arg => arg.ToLowerInvariant().TrimStart('/', '-') == ServiceConfiguration.CliFlagHelp))
         {
-            ServiceConfiguration.PrintHelp(app.Logger);
+            ServiceConfiguration.PrintHelp();
         }
         else
         {

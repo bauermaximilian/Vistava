@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.Reflection;
+
 namespace Vistava.Service.Common;
 
 public record ServiceConfiguration
@@ -37,9 +39,11 @@ public record ServiceConfiguration
         };
     }
 
-    public static void PrintHelp(ILogger logger)
+    public static void PrintHelp()
     {
-        logger.LogInformation(@$"--{CliFlagHelp}: Print this help. 
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "";
+        Console.WriteLine(@$"** Vistava.Service {version} **
+--{CliFlagHelp}: Print this help. 
 --{CliFlagDebug}=true: Set default log level to 'debug'.
 --{CliFlagPort}=PORT: Accept for HTTP/S traffic on the specified port.
 --{CliFlagRandomizeBasePath}=true: Randomize the application URL root.
