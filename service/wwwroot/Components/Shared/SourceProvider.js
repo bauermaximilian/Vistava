@@ -108,7 +108,7 @@ export class SourceProvider {
       try {
          let sourceInstance = new sourceModule.default(sourceConfiguration);
          if (sourceInstance != null && typeof (sourceInstance) === "object" &&
-            "createContentRetriever" in sourceInstance) {
+            "createCollectionRetriever" in sourceInstance) {
             this.#sources.set(sourceIdentifier, sourceInstance);
          } else {
             throw new Error("The imported source module wasn't a valid 'Source' class instance.");
