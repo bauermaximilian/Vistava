@@ -1,26 +1,21 @@
 {
   "version": "2.0.0",
   "tasks": [
-   {
-      "label": "Build app",
-      "type": "shell",
-      "command": "npm run build"
-   },
-   {
-      "label": "Build app (Windows)",
-      "type": "shell",
-      "command": "npm run build:windows"
-   },
-   {
-      "label": "Build app (Linux)",
-      "type": "shell",
-      "command": "npm run build:linux"
-   },
-   {
-      "label": "Start app",
-      "type": "shell",
-      "command": "npm run start"
-   },
+    {
+        "label": "Build app (Windows)",
+        "type": "shell",
+        "command": "npm run build:windows"
+    },
+    {
+        "label": "Build app (Linux)",
+        "type": "shell",
+        "command": "npm run build:linux"
+    },
+    {
+        "label": "Start app",
+        "type": "shell",
+        "command": "npm run start"
+    },
     {
       "label": "Start app service",
       "type": "shell",

@@ -16,15 +16,15 @@
     "prebuild:windows": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Windows",
     "prebuild:linux": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Linux",
     "prebuild": "npm run prebuild:windows && npm run prebuild:linux",
-    "build:windows": "npm run prebuild:windows && electron-builder -w",
-    "build:linux-debug": "npm run prebuild:linux && env DEBUG='@malept/flatpak-bundler' electron-builder -l",
-    "build:linux": "npm run prebuild:linux && electron-builder -l",
-    "build": "electron-builder -wl",
+    "build:windows": "node ./build/get-ffmpeg.js && npm run prebuild:windows && electron-builder -w",
+    "build:linux-flatpak": "npm run prebuild:linux && env DEBUG='@malept/flatpak-bundler' electron-builder --linux flatpak",
+    "build:linux": "npm run prebuild:linux && electron-builder --linux tar.bz2 --linux pacman",
     "prestart": "npm run prebuild",
     "start": "electron . --debug-mode",
     "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069 --debug=true --disableHttps=true"
   },
   "devDependencies": {
+    "7zip-min": "^3.0.1",
     "electron": "^44.3.0",
     "electron-builder": "^26.15.3"
   },
@@ -152,6 +152,16 @@
       "target": [
         "zip",
         "nsis"
+      ],
+      "extraResources": [
+        {
+        "from": "build/ffmpeg/ffmpeg.exe",
+        "to": "app/bin/win/ffmpeg.exe"
+        },
+        {
+        "from": "build/ffmpeg/ffprobe.exe",
+        "to": "app/bin/win/ffprobe.exe"
+        }
       ],
       "icon": "build/icon.ico"
     },
