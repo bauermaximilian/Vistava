@@ -59,7 +59,7 @@ public class OptionsController(KestrelProperties kestrelProperties, AppPathProvi
     {
         return new ServiceInformation(
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0",
-            IsLocalRequest() ? new Uri(AppPathsHelper.GenerateIncludePath()).AbsoluteUri : null,
+            IsLocalRequest() ? new Uri(AppPathsHelper.GenerateAppDataPath()).AbsoluteUri : null,
             serviceConfiguration.Debug);
     }
 

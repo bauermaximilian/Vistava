@@ -28,7 +28,7 @@ BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, docum
    try {
       let serviceInfo = await (await fetch("./api/options/info")).json();
       Assert.isActive = serviceInfo.debugMode;
-      e.includePathUrl = serviceInfo.includeFolderUrl ?? null;
+      e.appDataFolderUri = serviceInfo.appDataFolderUri ?? null;
       console.info(`Connected to service version ${serviceInfo.version}${(Assert.isActive ? " (debug mode)" : "")}.`);
    } catch (error) {
       console.error("Couldn't retrieve service information!");

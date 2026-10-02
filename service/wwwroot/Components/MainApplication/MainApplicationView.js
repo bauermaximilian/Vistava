@@ -32,8 +32,8 @@ export class MainApplicationView extends ViewBase {
 
    get sourceProvider() { return this.#sourceProvider; }
    
-   get includePathUrl() { return this.#includePathUrl; }
-   set includePathUrl(value) { this.#includePathUrl = value; }
+   get appDataFolderUri() { return this.#appDataFolderUri; }
+   set appDataFolderUri(value) { this.#appDataFolderUri = value; }
 
    /**
     * @template T
@@ -81,7 +81,7 @@ export class MainApplicationView extends ViewBase {
    /** @type {boolean} */
    #sharingEnabled = false;
    /** @type {string?} */
-   #includePathUrl = null;
+   #appDataFolderUri = null;
 
    get #shareLinkFull() {
       return (this.#shareLinkBase === null || this.#shareLinkHash === null) ?
@@ -351,8 +351,8 @@ export class MainApplicationView extends ViewBase {
             }, "Available media source extensions");
             this.#getSetElementAttribute(e, "data-disabled", this.sourceProvider.count <= 1);
             e.addEventListener("auxclick", () => {
-               if (this.#includePathUrl != null && this.#includePathUrl.length > 0) {
-                  this.#tryOpenUrlAsPopup(this.#includePathUrl);
+               if (this.#appDataFolderUri != null && this.#appDataFolderUri.length > 0) {
+                  this.#tryOpenUrlAsPopup(this.#appDataFolderUri);
                }
             });
             this.#updateToolbarIcon(e);
