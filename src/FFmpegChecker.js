@@ -2,19 +2,26 @@
 
 import { exec } from "child_process";
 import { promisify } from "util";
+import { dirname } from "path";
 import { MissingDependenciesError } from "./Errors.js";
+import { VistavaServiceManager } from "./VistavaServiceManager.js";
 
 /**
  * @param {string} command 
+ * @param {string} [cwd]
  * @param {boolean} [hideWindow=true]
  * @returns {Promise<{stdout:string,stderr:string}>}
  */
-const execAsync = async (command, hideWindow = true) => await (promisify(exec))(command, { windowsHide: hideWindow });
+const execAsync = async (command, cwd, hideWindow = true) =>
+   await (promisify(exec))(command, { windowsHide: hideWindow, cwd });
 
 export class FFmpegChecker {
    static async ensureFFmpegInstalled() {
-      var ffmpegVersion = await execAsync("ffmpeg -version");
-      var ffprobeVersion = await execAsync("ffprobe -version");
+      let servicePath = VistavaServiceManager.getServicePath();
+      let serviceDirectoryPath = dirname(servicePath);
+
+      let ffmpegVersion = await execAsync("ffmpeg -version", serviceDirectoryPath);
+      let ffprobeVersion = await execAsync("ffprobe -version", serviceDirectoryPath);
 
       if (ffmpegVersion.stderr != null && ffmpegVersion.stderr.trim().length > 0) {
          throw new MissingDependenciesError("ffmpeg isn't available.");

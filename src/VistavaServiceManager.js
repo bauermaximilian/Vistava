@@ -19,7 +19,7 @@ export class VistavaServiceManager {
          throw new InvalidOperationError("The service is already running.");
       }
 
-      let servicePath = this.#getServicePath();
+      let servicePath = VistavaServiceManager.getServicePath();
       let serviceCwd = path.dirname(servicePath);
 
       this.#process = await new Promise((resolve, reject) => {
@@ -95,7 +95,7 @@ export class VistavaServiceManager {
    /**
     * @returns {string}
     */
-   #getServicePath() {
+   static getServicePath() {
       let executablePath;
       if (process.platform === "win32") {
          executablePath = "win/Vistava.Service.exe"
