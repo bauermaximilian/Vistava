@@ -50,6 +50,8 @@ public static class Program
             { "Logging:LogLevel:Microsoft.Extensions.Hosting.Internal.Host", "Information" }
         });
 
+        string configurationsPath = CreateAppdataDirectory();
+
         configureServices(builder.Services);
 
         var certificatePath = AppPathsHelper.GenerateHttpsCertificatePath();
@@ -85,7 +87,7 @@ public static class Program
 
         try
         {
-            CreateAndPopulateAppdataDirectories(combinedFileProvider);
+            PopulateAppdata(configurationsPath, combinedFileProvider);
         }
         catch (Exception exc)
         {
@@ -194,8 +196,8 @@ public static class Program
             return false;
         }
     }
-    
-    private static void CreateAndPopulateAppdataDirectories(IFileProvider applicationFilesProvider)
+
+    private static string CreateAppdataDirectory()
     {
         string configurationsPath = AppPathsHelper.GenerateConfigurationsIncludePath();
         try
@@ -210,7 +212,11 @@ public static class Program
             throw new InvalidOperationException("The directory for configurations couldn't be created " +
                 $"under \"{configurationsPath}\".", exc);
         }
-
+        return configurationsPath;
+    }
+    
+    private static void PopulateAppdata(string configurationsPath, IFileProvider applicationFilesProvider)
+    {
         var configurationFilesNames = new List<string>() { AppPathsHelper.ConfigurationKeyboardFileName,
             AppPathsHelper.ConfigurationGamepadFileName, AppPathsHelper.ConfigurationApplicationFileName };
 
