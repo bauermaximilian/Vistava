@@ -1,96 +1,56 @@
+<p align="center">
+  <img src="assets/icon.svg" alt="Vistava icon" width="72" height="72" />
+</p>
+
 # Vistava
 
-A no-nonsense multimedia browser for your files, with local network sharing support.
+A chill, minimalist viewer for images and videos. Makes browsing your media simple - on any device.
 
-## Overview
+<p align="center">
+  <img src="assets/screenshot.png" alt="Vistava screenshot" />
+</p>
 
-Vistava shows your local folders and files in a masonry-style gallery and lets you browse your photos, artwork, comics, or videos with ease - whether you use a keyboard, mouse, touchscreen, or even gamepad. 
+## What can you do with it?
 
-When the sharing feature is enabled, Vistava can be accessed through the web browser of any smartphone, tablet, game console, TV or VR/AR headset within the same local network; no internet access required.
+- Browse your image and video library in peace
+- Navigate via mouse, keyboard, touch screen, or gamepad
+- Share your media to a TV, smartphone, or VR headset within your network
+- View content from third-party sources with optional extensions
 
-Vistava is completely free, open source and supported on Windows and Linux, with the sharing feature supported by Chrome and other modern web browsers on PC and mobile devices.
+## Local network sharing
 
-### Example use-cases
+Enable the network sharing from the desktop app and Vistava generates a temporary HTTP URL. Enter that on another device in the same network (private WiFi or LAN) with a web browser or scan the QR code shown in the app.
 
-- Easily watch videos from your PC on your VR headset without additional apps
-- Watch movies from your computer on your smart TV, Playstation or Xbox
-- Browse through your local collection of artwork or reference images without distractions
-- Read comics or manga comfortably on every device
-- Make slideshow presentations of detailled pictures or diagrams
+That second device will then show the same UI and the same media library, so you can watch all your media on a Smart TV, tablet, phone, or VR headset without moving files around or going through some cloud service.
 
-## Installation and building
+## Extensions
 
-### Windows
+With extensions, Vistava can also view content from third-party media sources with HTTP APIs. Explore the available projects through the [Vistava GitHub topic](https://github.com/topics/vistava).
 
-Go to the "Releases" section and download the most recent Vistava installer (recommended) or the ZIP archive for running the application without installing. When using the ZIP version, make sure you have a full and recent version of ffmpeg installed (and available in your PATH).
+## Downloads
 
-After installing or extracting the application, run the application using the Desktop shortcut or by opening the "Vistava" executable in the extracted directory.
+Downloads are available on the [Releases page](https://github.com/bauermaximilian/Vistava/releases):
 
-### Linux
+- **Windows:** installer (recommended) or portable ZIP
+- **Linux:** Flatpak (recommended), pacman package or tarball
 
-Depending on your distribution, you can choose between downloading a flatpak version (for any Linux distribution supporting flatpak), a pacman package (for Arch and derivatives) or a simple archive with the precompiled binaries. The latter will require a valid (full) installation of ffmpeg available on the system. Currently, only the AMD64 architecture is supported.
+See the documentation on the [Vistava website](https://vistava.net/docs.html) for usage instructions and more information about the application.
 
-### Build from source
-
-To build the application from source, Node.js (24.9 or newer), npm (11.6.2 or newer) and the .NET SDK (8.0.20 or newer) are required. Either open the root repository folder in VSCode and run the "Build app" task, or open a command line interface inside the root folder and run `npm install` and `npm run build` (or, depending on your target platform, `npm run build:windows` or `npm run build:linux`). See the `/dist` folder for the build output.
-
-#### Flatpak build dependencies
-
-For building the flatpak version, make sure you have `flatpak` and `flatpak-builder` installed. Additionally, the runtime and SDK need to be installed as well using `flatpak install org.freedesktop.Platform/x86_64/25.08`, `flatpak install org.freedesktop.Sdk/x86_64/25.08` and `flatpak install app/org.electronjs.Electron2.BaseApp/x86_64/25.08`.
-
-The flatpak bundler pulls the sources for ffmpeg, lib-dav1d and lib-x264 from their respective Git repositories and installs these dependencies into the flatpak, which can take 5-10 minutes (or longer) depending on your hardware. If the process fails, you can either use the npm script "build:linux-debug" to display verbose build information for troubleshooting, or remove the "flatpak" entry from "build.linux.target" (to skip building the flatpak).
-
-## Usage
-
-Vistava can either be opened directly, or by right-clicking on a directory on your file explorer and clicking on "Open with Vistava". 
-
-### Local network sharing
-
-Upon starting the application, the "sharing" feature is initially disabled - so Vistava can not be accessed over the local network until the "Share" button (in the top right of the window) is clicked and local network sharing is enabled. 
-
-When enabled, the "Link" button becomes accessible - which will, upon hovering over it, show the URL and a QR code to access Vistava from anywhere within your local network. Clicking onto the "Link" button will copy the URL to the clipboard.
-
-### User input
-
-Vistava can be navigated using a mouse, a keyboard, a touchscreen or certain supported gamepads.
-
-When navigating through folders or opening files, the previous/following directory or view can be accessed by using the "back" or "forward" functionality. Unless when in the root directory, the parent directory can also always be reached by clicking on the first tile (the directory symbol with the two dots in it).
-
-The thumbnail and detail views are synchronized - meaning that, when opening the first media file in a directory and then navigating to the next items there, returning to the thumbnail view will change the selection to the media item that was last viewed in the detail view.
-
-#### Mouse
-
-The application can be navigated using a mouse only - by clicking on available files and directories with the left mouse button and scrolling through the available content using the mouse wheel. 
-
-Navigating back or forward in history can be done either using the buttons in the top left corner of the window, or dedicated "back" and "forward" buttons on your mouse - if available.
-
-When opening the "detail view" of an image or video, the controls for zooming, controlling playback (for videos) or toggling fullscreen can be found by moving the cursor to the bottom of the window. For zooming both images and videos, double-clicking on the media item can be used as well as the mouse wheel. The detail view can be left by using the back button.
-
-#### Keyboard
-
-Vistava can be controlled using only a keyboard as well: Using the arrow keys moves the selection around, while hitting the "enter" key will open the selected folder or file. Slowly scrolling through the available content can be done by holding down the arrow keys in the desired direction.
-
-The "backspace" key will navigate one step back in history - which works both when navigating folders, or when switching from the detail view back to the thumbnail view.
-
-In the detail view, the different zoom modes can be cycled through by using "right shift". Zooming in/out can also be done using the "+"/"-" keys or the ","/"." keys. When zoomed in, the media item can be moved around using the arrow keys. By pressing the "F" key, fullscreen will be toggled. To start or pause playback of a video, the "spacebar" key can be used. When a video is being played back, the arrow keys can be used to skip through the video (using "left" and "right") or to adjust the volume ("up" and "down"). The "M" key can be used to mute or unmute audio of video playback.
-
-#### Touchscreen
-
-When using the "sharing" feature with a smartphone (or when having a touchscreen on the computer where Vistava is running on), Vistava can also be controlled using touch gestures. Scrolling through content and opening items can be done with swiping and tapping, while the detail view also supports drag and pinch gestures to zoom in or out of an image or video, to move it around the screen, or to switch to the next one in the directory.
-
-#### Gamepads
-
-For certain scenarios (e.g. presentations), the application can also be controlled using a game controller. Currently supported are standard Xbox controllers, PlayStation 4 controllers and the Nintendo Switch Joy Cons on the Vistava application itself. Note that this does _not_ work when accessing the application over the "Sharing" feature.
-
-While the button mappings and functionality may vary across the different controller types, different operating systems or connection mode (bluetooth vs. cable), the input scheme is similar to the keyboard-based one: Analog sticks or D-Pads are equivalent to the arrow keys, the primary action button (e.g. "A" on an Xbox Controller) is the equivalent of the "enter" key, and the secondary action button (e.g. "B" on an Xbox Controller) is the equivalent of the "backspace" key.
+[![Developed by a Human, Not by AI](assets/badge.png "Developed by a Human, Not by AI")](https://notbyai.fyi)
 
 ## License
 
-Copyright (C) 2025 Maximilian Bauer.
+Copyright (C) 2020-2026 Maximilian Bauer
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
