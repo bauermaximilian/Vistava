@@ -55,7 +55,7 @@ export class VistavaWindow {
    }
 
    #handleOnClose = (/** @type {{ preventDefault: () => void; }} */ event) => {
-      this.#window.webContents.session.clearCache().finally(() => this.#window.destroy());
+      this.#window.webContents.session.clearStorageData().finally(() => this.#window.destroy());
       event.preventDefault();
    };
 }
