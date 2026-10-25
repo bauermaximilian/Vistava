@@ -23,6 +23,9 @@
     "start": "electron . --debug-mode",
     "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069 --debug=true --disableHttps=true"
   },
+  "dependencies": {
+    "7zip-min": "^3.0.1"
+  },
   "devDependencies": {
     "7zip-min": "^3.0.1",
     "electron": "^44.3.0",

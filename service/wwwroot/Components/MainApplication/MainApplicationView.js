@@ -165,6 +165,14 @@ export class MainApplicationView extends ViewBase {
          });
          this.#contextMenuEntries.push(entry);
       }
+      this.#contextMenuEntries.push(new ContextMenuEntryPresenter(new ContextMenuEntryModel()));
+      let installExtensionEntryModel = new ContextMenuEntryModel();
+      installExtensionEntryModel.label = "Install extension...";
+      let installExtensionEntry = new ContextMenuEntryPresenter(installExtensionEntryModel);
+      installExtensionEntry.onActivated.subscribe(() => {
+         this.#tryOpenExtensionInstaller();
+      });
+      this.#contextMenuEntries.push(installExtensionEntry);
 
       this.style.display = "flex";
       this.style.flexDirection = "column";
@@ -349,7 +357,6 @@ export class MainApplicationView extends ViewBase {
                      RU.new(buttonBounds.x, barBounds.y, buttonBounds.width, barBounds.height));
                }
             }, "Available media source extensions");
-            this.#getSetElementAttribute(e, "data-disabled", this.sourceProvider.count <= 1);
             e.addEventListener("auxclick", () => {
                if (this.#appDataFolderUri != null && this.#appDataFolderUri.length > 0) {
                   this.#tryOpenUrlAsPopup(this.#appDataFolderUri);
@@ -515,6 +522,14 @@ export class MainApplicationView extends ViewBase {
          window.vistavaBridge.openUrl(url);
       } else if (!url.startsWith("file:")) {
          window.open(url, '_blank')?.focus();
+      }
+   }
+
+   #tryOpenExtensionInstaller() {
+      if ("vistavaBridge" in window && typeof (window.vistavaBridge) === "object" &&
+         window.vistavaBridge != null && "triggerExtensionImport" in window.vistavaBridge &&
+         typeof (window.vistavaBridge.triggerExtensionImport) === "function") {
+         window.vistavaBridge.triggerExtensionImport();
       }
    }
 

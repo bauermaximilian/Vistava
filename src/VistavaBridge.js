@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-const { contextBridge, shell } = require("electron");
+const { contextBridge, shell, ipcRenderer } = require("electron");
 const url = require("url");
 const fs = require("node:fs");
 
@@ -35,5 +35,8 @@ contextBridge.exposeInMainWorld("vistavaBridge", {
          console.warn(`Protocol "${urlObject.protocol}" not supported.`);
          return false;
       }
+   },
+   triggerExtensionImport: () => {
+      ipcRenderer.invoke("showExtensionImportDialog");
    }
 });
