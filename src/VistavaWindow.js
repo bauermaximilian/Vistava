@@ -6,6 +6,7 @@ import { unpack, list } from '7zip-min';
 import fs from "node:fs";
 import path from "path";
 
+const extensionBundleFileExtension = "vex.zip";
 const extensionDefinitionFileExtension = ".source.json";
 const extensionTargetSubPath = "Service/v1.0/include/Sources";
 
@@ -84,7 +85,7 @@ export class VistavaWindow {
       if (warningResult.response === 0) {
          let extensionResult = await dialog.showOpenDialog(this.#window, {
             filters: [
-               { name: "Vistava extension", extensions: ["vex.zip"] },
+               { name: "Vistava extension", extensions: [extensionBundleFileExtension] },
                { name: "All Files", extensions: ["*"] }
             ],
             properties: ["openFile", "dontAddToRecent"]
