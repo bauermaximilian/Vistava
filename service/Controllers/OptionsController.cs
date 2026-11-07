@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.Data;
 using System.Net;
 using System.Reflection;
 using System.Text.Json;
@@ -64,52 +65,66 @@ public class OptionsController(KestrelProperties kestrelProperties, AppPathProvi
     }
 
     [HttpGet("sources")]
-    public async Task<ActionResult<IDictionary<string, SourceConfiguration>>> GetSources() 
+    public async Task<ActionResult<IDictionary<string, object>>> GetSources() 
     {
-        var sources = new Dictionary<string, SourceConfiguration>();
-        foreach (var fileEntry in fileProvider.GetDirectoryContents("Sources")) 
+        var sources = new Dictionary<string, object>();
+        var errors = new List<Exception>();
+        foreach (var fileEntry in fileProvider.GetDirectoryContents("Sources"))
         {
             var fileName = fileEntry.Name.ToLower();
             int sourceDefinitionSuffixIndex = fileName.LastIndexOf(SourceDefinitionSuffix);
-            if (fileName.EndsWith(SourceDefinitionSuffix)) 
+            if (fileName.EndsWith(SourceDefinitionSuffix))
             {
                 var sourceName = fileName[..sourceDefinitionSuffixIndex];
                 if (sources.ContainsKey(sourceName))
                 {
-                    logger.LogWarning("The source '{name}' was defined more than once - only the " + 
-                        "first encounter will be loaded.", sourceName);
+                    errors.Add(new DuplicateNameException($"The source '{sourceName}' was defined more than " +
+                        "once - only the first encounter will be loaded."));
                 }
-                
+
                 SourceConfiguration? sourceConfiguration = null;
-                try 
+                try
                 {
                     using var fileEntryStream = fileEntry.CreateReadStream();
-                    sourceConfiguration = await JsonSerializer.DeserializeAsync<SourceConfiguration>(
-                        fileEntryStream, sourceDefinitionSerializerOptions) ?? 
-                        throw new InvalidOperationException("The definition was deserialized into a null value.");
-                    if (string.IsNullOrWhiteSpace(sourceConfiguration.ModuleFileName)) 
+                    try
                     {
-                        throw new InvalidOperationException("The definition did not provide a valid module file name.");
+                        sourceConfiguration = await JsonSerializer.DeserializeAsync<SourceConfiguration>(
+                            fileEntryStream, sourceDefinitionSerializerOptions) ??
+                            throw new InvalidOperationException("The structure must not be null.");
                     }
-                    if (!fileProvider.GetDirectoryContents("Sources").Any(
-                        file => file.Name == sourceConfiguration.ModuleFileName)) 
+                    catch (Exception exc)
                     {
-                        throw new InvalidOperationException("The definition specified a module file name " +
-                            "that couldn't be found.");
+                        throw new InvalidOperationException($"The configuration was invalid JSON: {exc.Message}");
                     }
-                }
-                catch (Exception exc) 
-                {
-                    logger.LogWarning("The source definition '{name}' couldn't be loaded. {exc}", 
-                        sourceName, exc.Message);
-                }
-                
-                if (sourceConfiguration != null) 
-                {
+
+                    if (string.IsNullOrWhiteSpace(sourceConfiguration.ModuleFileName))
+                    {
+                        throw new InvalidOperationException(
+                            "The configuration did not provide a valid module file name.");
+                    }
+
+                    var moduleFileInfo = fileProvider.GetFileInfo("Sources/" + sourceConfiguration.ModuleFileName);
+                    if (!moduleFileInfo.Exists || moduleFileInfo.IsDirectory)
+                    {
+                        throw new InvalidOperationException("The module root file wasn't found.");
+                    }
+
+                    if (!sourceConfiguration.ModuleFileName.StartsWith(sourceName + "/"))
+                    {
+                        throw new InvalidOperationException("The module root file must reside in a subdirectory " +
+                            "with the same name as the module identifier.");
+                    }
+
                     sources[sourceName] = sourceConfiguration;
+                }
+                catch (Exception exc)
+                {
+                    errors.Add(new InvalidOperationException($"The extension \"{sourceName}\" couldn't be loaded. " +
+                        exc.Message));
                 }
             }
         }
+        sources["$errors"] = errors.Select(exception => exception.Message);
         return sources;
     }
 
