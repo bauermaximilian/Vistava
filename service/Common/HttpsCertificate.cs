@@ -5,22 +5,16 @@ using System.Text;
 
 namespace Vistava.Service.Common;
 
-public class HttpsCertificate
+public class HttpsCertificate(X509Certificate2 certificate)
 {
-	public X509Certificate2 Certificate { get; }
+   public X509Certificate2 Certificate { get; } = certificate;
 
-	public HttpsCertificate(X509Certificate2 certificate) => 
-		Certificate = certificate;
-
-	public HttpsCertificate(byte[] certificateRawData) => 
-		Certificate = new(certificateRawData);
-
-	/// <summary>
-	/// Exports the certificate and the private key in the PFX format.
-	/// Commonly used file extensions for this format are <c>pfx</c> and <c>p12</c>.
-	/// </summary>
-	/// <returns>The certificate file as <see cref="byte"/> array.</returns>
-	public byte[] ExportAsPfx()
+   /// <summary>
+   /// Exports the certificate and the private key in the PFX format.
+   /// Commonly used file extensions for this format are <c>pfx</c> and <c>p12</c>.
+   /// </summary>
+   /// <returns>The certificate file as <see cref="byte"/> array.</returns>
+   public byte[] ExportAsPfx()
 	{
 		return Certificate.Export(X509ContentType.Pfx);
 	}
@@ -81,7 +75,7 @@ public class HttpsCertificate
 	}
 	
 	/// <summary>
-	/// Imports a <see cref="HttpsCertificate"/> from a <c>.cer</c> or <c>.pfx</c> file.
+	/// Imports a <see cref="HttpsCertificate"/> from a <c>.pfx</c> file.
 	/// </summary>
 	/// <param name="path">The path to the certificate file.</param>
 	/// <returns>A new <see cref="HttpsCertificate"/> instance.</returns>
@@ -99,9 +93,7 @@ public class HttpsCertificate
 		}
 		try
 		{
-			var certificate = X509Certificate.CreateFromCertFile(path);
-			var certificatev2 = new X509Certificate2(certificate);
-			return new HttpsCertificate(certificatev2);
+			return new HttpsCertificate(X509CertificateLoader.LoadPkcs12FromFile(path, null));
 		}
 		catch (Exception exc)
 		{
