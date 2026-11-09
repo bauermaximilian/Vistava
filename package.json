@@ -1,7 +1,7 @@
 {
   "name": "vistava",
-  "desktopName": "com.bauermaximilian.vistava",
-  "version": "1.0.0-beta.4",
+  "desktopName": "net.vistava.vistava",
+  "version": "1.0.0",
   "description": "A no-nonsense media browser",
   "license": "GPL-3.0-or-later",
   "author": "Maximilian Bauer",
@@ -33,7 +33,7 @@
   },
   "build": {
     "productName": "Vistava",
-    "appId": "com.bauermaximilian.vistava",
+    "appId": "net.vistava.vistava",
     "copyright": "Copyright (C) 2026 Maximilian Bauer",
     "asar": "false",
     "electronLanguages": "en-US",
