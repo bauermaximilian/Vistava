@@ -24,10 +24,11 @@ finish-args:
   - --device=input # For gamepad support
   - --filesystem=home:ro
   - --filesystem=/run/udev:ro # For gamepad support
-  - --env=XCURSOR_PATH=/run/host/user-share/icons:/run/host/share/icons
   - --talk-name=org.freedesktop.Notifications
   - --talk-name=org.kde.StatusNotifierWatcher
   - --talk-name=com.canonical.AppMenu.Registrar
+  - --env=XCURSOR_PATH=/run/host/user-share/icons:/run/host/share/icons
+  - --env=DOTNET_ROOT=/app/lib/dotnet
 build-options:
   prepend-path: "/usr/lib/sdk/dotnet10/bin"
   append-ld-library-path: "/usr/lib/sdk/dotnet10/lib"
@@ -51,11 +52,11 @@ modules:
         npm_config_cache: /run/build/vistava/flatpak-node/npm-cache
         npm_config_offline: 'true'
     build-commands:
-      - dotnet publish ./service/Vistava.Service.csproj -c Release --no-self-contained --source ../nuget-sources
       - npm install --save-dev --offline
       - |
         . ../flatpak-node/electron-builder-arch-args.sh
-        npm run build:linux-no-prebuild -- $ELECTRON_BUILDER_ARCH_ARGS
+        export PREBUILD_ARGS="--source ../nuget-sources"
+        npm run build:linux -- $ELECTRON_BUILDER_ARCH_ARGS
       - cp -a dist/linux*unpacked /app/main
       - install -Dm755 -t /app/bin/ ../run.sh
       - install -Dm644 net.vistava.vistava.metainfo.xml /app/share/metainfo/net.vistava.vistava.metainfo.xml
@@ -84,10 +85,6 @@ modules:
       - type: file
         path: ../icons/icon.svg
         dest: main/images
-      #- type: archive
-      #  url: https://github.com/flathub/net.vistava.vistava/archive/refs/tags/1.0.2.tar.gz
-      #  sha256: 68f8c277234198a17adddc05147b1a919b233e1fa31d7427be0ceb45e6cf0a26
-      #  dest: main
       - generated-sources.json
       - nuget-sources.json
       - type: script
