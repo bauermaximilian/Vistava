@@ -1,6 +1,5 @@
 # Custom project-specific additions
 node_modules/
-package-lock.json
 dist/
 .idea/
 
