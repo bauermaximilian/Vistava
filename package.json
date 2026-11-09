@@ -13,6 +13,7 @@
   "type": "module",
   "main": "src/Vistava.js",
   "scripts": {
+    "rebuild-icon": "cd build/icons && magick -background transparent -define 'icon:auto-resize=16,24,32,48,64,96,128,256,512' icon.svg icon.ico",
     "prebuild:windows": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Windows",
     "prebuild:linux": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Linux",
     "build:windows": "npm run prebuild:windows && node ./build/windows/get-ffmpeg.js && npm run prebuild:windows && electron-builder -w",   
@@ -76,7 +77,7 @@
           "to": "app/bin/win/ffprobe.exe"
         }
       ],
-      "icon": "build/windows/icon.ico"
+      "icon": "build/icons/icon.ico"
     },
     "nsis": {
       "artifactName": "${name}-${os}-setup-${version}.${ext}",

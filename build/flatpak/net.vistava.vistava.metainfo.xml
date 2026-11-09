@@ -123,8 +123,8 @@
   </developer>
 
   <branding>
-    <color type="primary" scheme_preference="light">#FFFFFF</color>
-    <color type="primary" scheme_preference="dark">#232323</color>
+    <color type="primary" scheme_preference="light">#d8d8d8</color>
+    <color type="primary" scheme_preference="dark">#1e1e1e</color>
   </branding>
 
   <provides>
