@@ -158,15 +158,15 @@
       ],
       "extraResources": [
         {
-        "from": "build/ffmpeg/ffmpeg.exe",
-        "to": "app/bin/win/ffmpeg.exe"
+          "from": "build/windows/ffmpeg/ffmpeg.exe",
+          "to": "app/bin/win/ffmpeg.exe"
         },
         {
-        "from": "build/ffmpeg/ffprobe.exe",
-        "to": "app/bin/win/ffprobe.exe"
+          "from": "build/windows/ffmpeg/ffprobe.exe",
+          "to": "app/bin/win/ffprobe.exe"
         }
       ],
-      "icon": "build/icon.ico"
+      "icon": "build/windows/icon.ico"
     },
     "nsis": {
       "artifactName": "${name}-${os}-setup-${version}.${ext}",
@@ -174,7 +174,8 @@
       "license": "COPYING",
       "oneClick": false,
       "perMachine": true,
-      "uninstallDisplayName": "${productName}"
+      "uninstallDisplayName": "${productName}",
+      "script": "build/windows/installer.nsi"
     }
   }
 }
