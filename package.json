@@ -15,12 +15,11 @@
   "scripts": {
     "prebuild:windows": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Windows",
     "prebuild:linux": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Linux",
-    "prebuild": "npm run prebuild:windows && npm run prebuild:linux",
-    "build:windows": "node ./build/get-ffmpeg.js && npm run prebuild:windows && electron-builder -w",
-    "build:linux-flatpak": "npm run prebuild:linux && env DEBUG='@malept/flatpak-bundler' electron-builder --linux flatpak",
-    "build:linux": "npm run prebuild:linux && electron-builder --linux tar.bz2 --linux pacman",
-    "prestart": "npm run prebuild",
-    "start": "electron . --debug-mode",
+    "build:windows": "npm run prebuild:windows && node ./build/windows/get-ffmpeg.js && npm run prebuild:windows && electron-builder -w",   
+    "build:linux-no-prebuild": "electron-builder --linux --dir",
+    "build:linux-flatpak": "cd build/flatpak && ./build-locally.sh",
+    "build:linux": "npm run prebuild:linux && electron-builder --linux dir --linux tar.bz2",
+    "start": "npm run prebuild:windows && npm run prebuild:linux && electron . --debug-mode",
     "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069 --debug=true --disableHttps=true"
   },
   "dependencies": {
@@ -28,8 +27,8 @@
   },
   "devDependencies": {
     "7zip-min": "^3.0.1",
-    "electron": "^44.3.0",
-    "electron-builder": "^26.15.3"
+    "electron": "^40.1.0",
+    "electron-builder": "^26.7.0"
   },
   "build": {
     "productName": "Vistava",
@@ -59,97 +58,8 @@
         "inode/directory"
       ],
       "maintainer": "Maximilian Bauer",
-      "target": [
-        "tar.bz2",
-        "pacman",
-        "flatpak"
-      ],
+      "target": "dir",
       "syncDesktopName": true
-    },
-    "pacman": {
-      "depends": [
-        "c-ares",
-        "gtk3",
-        "libevent",
-        "libvpx",
-        "libxslt",
-        "libxss",
-        "minizip",
-        "nss",
-        "re2",
-        "snappy",
-        "libnotify",
-        "libappindicator-gtk3",
-        "ffmpeg"
-      ]
-    },
-    "flatpak": {
-      "runtime": "org.freedesktop.Platform",
-      "runtimeVersion": "25.08",
-      "sdk": "org.freedesktop.Sdk",
-      "base": "org.electronjs.Electron2.BaseApp",
-      "baseVersion": "25.08",
-      "license": "COPYING",
-      "useWaylandFlags": true,
-      "modules": [
-        {
-          "name": "dav1d",
-          "buildsystem": "meson",
-          "sources": [
-            {
-              "type": "git",
-              "url": "https://code.videolan.org/videolan/dav1d.git"
-            }
-          ]
-        },
-        {
-          "name": "x264",
-          "sources": [
-            {
-              "type": "git",
-              "url": "https://code.videolan.org/videolan/x264.git"
-            }
-          ],
-          "config-opts": [
-            "--enable-shared"
-          ]
-        },
-        {
-          "name": "ffmpeg",
-          "sources": [
-            {
-              "type": "git",
-              "url": "https://git.ffmpeg.org/ffmpeg.git",
-              "tag": "n8.1.1"
-            }
-          ],
-          "config-opts": [
-            "--enable-gpl",
-            "--enable-libdav1d",
-            "--enable-libx264",
-            "--disable-static",
-            "--disable-doc",
-            "--enable-shared",
-            "--disable-ffplay",
-            "--disable-nvenc",
-            "--disable-debug"
-          ]
-        }
-      ],
-      "finishArgs": [
-        "--socket=x11",
-        "--socket=wayland",
-        "--share=ipc",
-        "--share=network",
-        "--filesystem=home:ro",
-        "--filesystem=/run/udev:ro",
-        "--talk-name=org.freedesktop.Notifications",
-        "--talk-name=org.kde.StatusNotifierWatcher",
-        "--talk-name=com.canonical.AppMenu.Registrar",
-        "--device=dri",
-        "--device=input",
-        "--socket=pulseaudio"
-      ]
     },
     "win": {
       "target": [
@@ -177,5 +87,9 @@
       "uninstallDisplayName": "${productName}",
       "script": "build/windows/installer.nsi"
     }
+  },
+  "allowScripts": {
+    "electron@40.10.6": true,
+    "electron-winstaller@5.4.0": true
   }
 }

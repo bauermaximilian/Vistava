@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2026 Maximilian Bauer -->
+<component type="desktop-application">
+  <id>net.vistava.vistava</id>
+  
+  <name>Vistava</name>
+  <summary>A no-nonsense media browser</summary>
+  
+  <metadata_license>CC-BY-SA-4.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+    <control>gamepad</control>
+    <control>tablet</control>
+  </supports>
+  
+  <description>
+    <p>
+      Vistava is a chill, minimalist viewer for images and videos. It makes browsing your media simple - on any device.
+    </p>
+    <ul>
+      <li>Browse your image and video library in peace</li>
+      <li>Navigate via mouse, keyboard, touch screen, or gamepad</li>
+      <li>Share your media to a TV, smartphone, or VR headset within your network</li>
+      <li>View content from third-party sources with optional extensions</li>
+    </ul>
+  </description>
+
+  <releases>
+    <release version="1.0.0" date="2026-11-10">
+      <url type="details">https://example.org/changelog.html#version_1.0.0</url>
+      <description>
+        <p>The first stable release of Vistava, featuring the following changes and improvements:</p>
+        <ul>
+          <li>Easier installation of extensions directly from within the application</li>
+          <li>Added configuration option for reduced animation mode</li>
+          <li>Various minor bugfixes</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.0.0-beta.4" date="2026-10-05">
+      <url type="details">https://github.com/bauermaximilian/Vistava/releases/tag/v1.0.0-beta.4</url>
+      <description>
+        <p>The fourth beta release, featuring the following changes and improvements:</p>
+        <ul>
+          <li>Extension support for alternative media sources</li>
+          <li>Editable configurations for keybindings and certain application settings</li>
+          <li>Added feature to open items and directories from Vistava in OS file explorer</li>
+          <li>Various bugfixes and UI/UX improvements</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.0.0-beta.3" date="2026-07-04">
+      <url type="details">https://github.com/bauermaximilian/Vistava/releases/tag/v1.0.0-beta.3-1</url>
+      <description>
+        <p>The third beta release, featuring the following changes and improvements:</p>
+        <ul>
+          <li>New thumbnail generation system using ffmpeg and ImageMagick on both Windows and Linux</li>
+          <li>Added experimental flatpak deployment (via flatpak file) to support more Linux distributions (replacing the AppImage and DEB versions)</li>
+          <li>Added built-in support for the 8BitDo Micro Bluetooth Gamepad</li>
+          <li>Various smaller bugfixes and improvements</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.0.0-beta.2" date="2025-12-19">
+      <url type="details">https://github.com/bauermaximilian/Vistava/releases/tag/v1.0.0-beta.2</url>
+      <description>
+        <p>The second beta release, featuring the following changes and improvements:</p>
+        <ul>
+          <li>Thumbnails for directories and playlists were redesigned to take less space</li>
+          <li>Icons have been cleaned up and improved</li>
+          <li>Experimental support for the image formats TIFF, PSD and DDS was added</li>
+          <li>Videos now loop by default</li>
+          <li>Various smaller bugfixes and usability improvements</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.0.0-beta.1" date="2025-10-22">
+      <url type="details">https://github.com/bauermaximilian/Vistava/releases/tag/v1.0.0-beta.1</url>
+      <description>
+        <p>The first beta release</p>
+      </description>
+    </release>
+  </releases>
+
+  <custom>
+    <value key="flathub::manifest">https://github.com/bauermaximilian/Vistava/tree/v1.0.0/build/flatpak/net.vistava.vistava.yml</value>
+  </custom>
+
+  <categories>
+    <category>Graphics</category>
+    <category>AudioVideo</category>
+  </categories>
+
+  <keywords>
+    <keyword>gallery</keyword>
+    <keyword>viewer</keyword>
+    <keyword>accessibility</keyword>
+    <keyword>media</keyword>
+    <keyword>images</keyword>
+    <keyword>videos</keyword>
+    <keyword>masonry</keyword>
+    <keyword>sharing</keyword>
+  </keywords>
+
+  <url>
+    <homepage>https://vistava.net</homepage>
+    <help>https://vistava.net/docs</help>
+    <vcs-browser>https://github.com/bauermaximilian/Vistava</vcs-browser>
+    <bugtracker>https://github.com/bauermaximilian/Vistava/issues</bugtracker>
+  </url>
+
+  <content_rating type="oars-1.0" />
+
+  <icon type="stock">net.vistava.vistava</icon>
+  <icon type="local">/app/share/icons/hicolor/scalable/apps/net.vistava.vistava.svg</icon>
+
+  <developer id="com.bauermaximilian">
+    <name>Maximilian Bauer</name>
+  </developer>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#FFFFFF</color>
+    <color type="primary" scheme_preference="dark">#232323</color>
+  </branding>
+
+  <provides>
+    <mediatype>inode/directory</mediatype>
+  </provides>
+
+  <launchable type="desktop-id">net.vistava.vistava.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://vistava.net/media/screenshot.png</image>
+      <caption>The main "gallery view" user interface</caption>
+    </screenshot>
+    <screenshot>
+      <video container="mp4" codec="h264" width="1280" height="720">https://vistava.net/media/demo.mp4</video>
+    </screenshot>
+  </screenshots>
+</component>
