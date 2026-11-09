@@ -54,3 +54,16 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+### Third-party dependencies
+
+Vistava uses the following third-party libraries or technologies:
+- [.NET](https://dotnet.microsoft.com) (under the [MIT license](https://en.wikipedia.org/wiki/MIT_License))
+- [ffmpeg](https://ffmpeg.org/) (under the [GNU General Public License (GPL) version 2](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html))
+- [FFMpegCore](https://github.com/rosenbjerg/FFMpegCore) (under the [MIT license](https://en.wikipedia.org/wiki/MIT_License))
+- [LiteDB](https://www.litedb.org/) (under the [MIT license](https://en.wikipedia.org/wiki/MIT_License))
+- [Magick.NET](https://github.com/dlemstra/Magick.NET) (under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0))
+- [qr-creator](https://github.com/nimiq/qr-creator) (under the [MIT license](https://en.wikipedia.org/wiki/MIT_License))
+- [electron](https://www.electronjs.org/) (under the [MIT license](https://en.wikipedia.org/wiki/MIT_License))
+- [electron-builder](https://www.electron.build/) (under the [MIT license](https://en.wikipedia.org/wiki/MIT_License))
+- [7zip-min](https://www.npmjs.com/package/7zip-min) (under the [MIT license](https://en.wikipedia.org/wiki/MIT_License))
