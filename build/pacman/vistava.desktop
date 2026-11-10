@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Vistava
+Exec=vistava
+Terminal=false
+Type=Application
+Icon=net.vistava.vistava
+Comment=A no-nonsense media browser
+MimeType=inode/directory;
+Categories=Graphics;AudioVideo;
