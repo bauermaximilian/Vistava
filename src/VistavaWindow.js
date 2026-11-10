@@ -75,8 +75,8 @@ export class VistavaWindow {
       let warningResult = await dialog.showMessageBox(this.#window, {
          type: "warning",
          title: "Extension security warning",
-         message: "Extensions can be a security risk and may contain malware. " +
-            "Only install them from trusted sources! Are you sure you want to proceed?",
+         message: "Extensions could contain malicious code or leak your personal data. " +
+            "Only install them from trusted sources! Do you want to proceed?",
          buttons: ["Yes", "No"],
          defaultId: 1,
          cancelId: 1
