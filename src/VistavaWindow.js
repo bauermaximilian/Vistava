@@ -113,7 +113,7 @@ export class VistavaWindow {
 
       // Check if there's exactly one definition file in the root directory
       let definitionFileEntries = extensionFileEntries.filter(
-         e => e.name.endsWith(extensionDefinitionFileExtension) && !e.name.includes("/") &&
+         e => e.name.endsWith(extensionDefinitionFileExtension) && !e.name.includes(path.sep) &&
             (e.size != null && parseInt(e.size) > 0) && e.encrypted === "-");
       
       if (definitionFileEntries.length === 1) {
@@ -123,7 +123,7 @@ export class VistavaWindow {
          // Check if any file in the archive is not in its respective extension subdirectory
          // with the same name as the definition file (without its extension)
          let forbiddenFileEntries = extensionFileEntries.filter(
-            e => !e.name.startsWith(extensionIdentifier + "/") && e.name !== definitionFileName &&
+            e => !e.name.startsWith(extensionIdentifier + path.sep) && e.name !== definitionFileName &&
                !(e.name === extensionIdentifier && e.attr?.startsWith("D") === true));
          
          if (forbiddenFileEntries.length > 0) {
