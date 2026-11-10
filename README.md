@@ -17,24 +17,21 @@ A chill, minimalist viewer for images and videos. Makes browsing your media simp
 - Share your media to a TV, smartphone, or VR headset within your network
 - View content from third-party sources with optional extensions
 
-## Local network sharing
+### Local network sharing
 
 Enable the network sharing from the desktop app and Vistava generates a temporary HTTP URL. Enter that on another device in the same network (private WiFi or LAN) with a web browser or scan the QR code shown in the app.
 
 That second device will then show the same UI and the same media library, so you can watch all your media on a Smart TV, tablet, phone, or VR headset without moving files around or going through some cloud service.
 
-## Extensions
+Please make sure to read the [privacy information](https://vistava.net/docs.html#/README?id=privacy) and the [documentation](https://vistava.net/docs.html#/3-usage?id=local-network-sharing) of the local network sharing feature before enabling this functionality.
+
+### Extensions
 
 With extensions, Vistava can also view content from third-party media sources with HTTP APIs. Explore the available projects through the [Vistava GitHub topic](https://github.com/topics/vistava).
 
 ## Downloads
 
-Downloads are available on the [Releases page](https://github.com/bauermaximilian/Vistava/releases):
-
-- **Windows:** installer (recommended) or portable ZIP
-- **Linux:** Flatpak (recommended), pacman package or tarball
-
-See the documentation on the [Vistava website](https://vistava.net/docs.html) for usage instructions and more information about the application.
+Downloads are available on the [Releases page](https://github.com/bauermaximilian/Vistava/releases) for **Windows** and **Linux**. See the documentation on the [Vistava website](https://vistava.net/docs.html) for usage instructions and more information about the application.
 
 [![Developed by a Human, Not by AI](assets/badge.png "Developed by a Human, Not by AI")](https://notbyai.fyi)
 
@@ -58,6 +55,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ### Third-party dependencies
 
 Vistava uses the following third-party libraries or technologies:
+
 - [.NET](https://dotnet.microsoft.com) (under the [MIT license](https://en.wikipedia.org/wiki/MIT_License))
 - [ffmpeg](https://ffmpeg.org/) (under the [GNU General Public License (GPL) version 2](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html))
 - [FFMpegCore](https://github.com/rosenbjerg/FFMpegCore) (under the [MIT license](https://en.wikipedia.org/wiki/MIT_License))

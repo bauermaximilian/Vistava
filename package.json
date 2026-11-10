@@ -48,7 +48,10 @@
     ],
     "extraFiles": [
       "README.md",
-      "COPYING"
+      "COPYING",
+      "assets/badge.png",
+      "assets/icon.svg",
+      "assets/screenshot.png"
     ],
     "linux": {
       "icon": "build/icons/",
