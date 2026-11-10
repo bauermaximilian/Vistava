@@ -7,11 +7,11 @@ import { finished } from "stream/promises";
 import { resolve, join, basename, dirname } from "path";
 import { Readable } from "stream";
 
-const ffmpegFilePath = "build/ffmpeg/ffmpeg.exe";
-const ffprobeFilePath = "build/ffmpeg/ffprobe.exe";
+const ffmpegFilePath = "build/windows/ffmpeg/ffmpeg.exe";
+const ffprobeFilePath = "build/windows/ffmpeg/ffprobe.exe";
 
 const url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.7z";
-const tempDirectoryPathRelative = "build/ffmpeg";
+const tempDirectoryPathRelative = "build/windows/ffmpeg";
 const downloadFileName = "ffmpeg-release-essentials.7z";
 const ffmpegSourceFileName = "ffmpeg.exe";
 const ffprobeSourceFileName = "ffprobe.exe";

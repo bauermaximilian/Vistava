@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "7zip-min": "^3.0.1",
-    "electron": "^40.1.0",
+    "electron": "40.1.0",
     "electron-builder": "^26.7.0"
   },
   "build": {
@@ -84,7 +84,7 @@
       "oneClick": false,
       "perMachine": true,
       "uninstallDisplayName": "${productName}",
-      "script": "build/windows/installer.nsi"
+      "include": "build/windows/installer.nsh"
     }
   },
   "allowScripts": {
