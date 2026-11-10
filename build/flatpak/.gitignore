@@ -1,3 +1,5 @@
 .flatpak-builder/
 build/
 build-repo/
+npm-sources.json
+nuget-sources.json
