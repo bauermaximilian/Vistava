@@ -32,7 +32,7 @@ GitHub Copilot (free tier) was used for proofreading the (human-written) texts o
 
 ### Privacy
 
-Vistava has no ads, analytics or user tracking, requires no subscriptions, does not depend on any cloud services or CDNs and can be used offline without internet access (until you decide to install extensions that pull media from the internet, of course). Vistava does not expose your data to the internet - even when the "local network sharing" feature is enabled (but please read the [related documentation](/3-usage?id=local-network-sharing) for information on how to use this feature safely!)
+Vistava has no ads, analytics or user tracking, requires no subscriptions, does not depend on any cloud services or CDNs and can be used offline without internet access (until you decide to install extensions that pull media from the internet, of course). Vistava does not expose your data to the internet and will not share your media library with your local network by default. Only when the "local network sharing" feature is enabled, Vistava will temporarily listen for incoming HTTP connections on the randomized URL displayed in the application - please read the [related documentation](/3-usage?id=local-network-sharing) for information on how to use this feature safely!
 
 ## License
 

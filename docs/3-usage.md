@@ -4,12 +4,16 @@ Vistava was designed to be intuitive, easy and non-frustrating to use in differe
 
 ## Local network sharing
 
-The "local network sharing" feature included in Vistava allows you to share your media files in your local network. When enabled, Vistava generates a local HTTP URL. Open it on another device in the same network (private WiFi or LAN) with a modern browser or scan the QR code shown in the app. That second device shows the same UI and the same media library, so you can easily watch your content on a Smart TV, tablet, phone, or VR headset.
+The "local network sharing" feature included in Vistava allows you to **share your media files in your local network**. When enabled, Vistava generates a local HTTP URL. Open it on another device in the same network (private WiFi or LAN) with a modern browser or scan the QR code shown in the app. That second device shows the same UI and the same media library, so you can easily watch your content on a Smart TV, tablet, phone, or VR headset.
 
 For security reasons, the generated URL is randomized and only works while network sharing is enabled. This should make it harder for others in the same network to gain access to your media without knowing the exact URL. To avoid accidentally exposing your media files to strangers, only enable this feature in its intended setting of a private home network behind a router.
 
 > [!CAUTION]
-> **Caution:** Never enable the local network sharing feature in unencrypted or public WiFi networks like at cafés or airports!
+> **CAUTION:** Never enable the local network sharing feature in unencrypted or public WiFi networks like at cafés or airports!
+
+The integrated HTTP server, which allows access to the application and your media library via a web browser, only accepts connections from other machines while the feature is enabled and the application is running. When the application is started initially, if the feature is disabled again (after enabling it) or after the application is closed, neither Vistava nor your media is accessible in your local network.
+
+It should be noted that, even when the network sharing feature is enabled, Vistava itself does not require an active internet connection and does not pull/push any data to external services outside your local network. This does _not_ apply if any third-party extensions are installed, which _may_ pull (or push!) data from/to the internet.
 
 Advanced users can (try to) configure HTTPS for the network sharing feature to increase security. See the [related section](/4-advanced?id=enabling-https-support) for more information.
 
