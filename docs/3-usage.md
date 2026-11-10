@@ -13,6 +13,18 @@ For security reasons, the generated URL is randomized and only works while netwo
 
 Advanced users can (try to) configure HTTPS for the network sharing feature to increase security. See the [related section](/4-advanced?id=enabling-https-support) for more information.
 
+## Installing extensions
+
+> [!CAUTION]
+> **CAUTION:** Extensions could contain **malicious code** or **leak your personal data**. Only install them from trusted sources!
+
+Vistava supports extensions, which provide additional sources of media content. An extension is usually distributed as a single file with the ".vex.zip" extension. The extension can be installed in Vistava by clicking the extensions button (with the "puzzle piece" symbol) in the title bar and then using the "Install extensions..." option. Read and confirm the security warning. Then, select the downloaded extension file in the file dialog and confirm your choice - and shortly after, Vistava should confirm the successful installation (or show an error message, if the process failed).
+
+Vistava will also offer you to open the created configuration file of the extension (which might require a JSON editor like [Notepad++](https://notepad-plus-plus.org/) to be installed, but "normal" Notepad will also work). Please consult the documentation of the extension for information on if or how that file should be edited (e.g. to add an API key or change certain preferences).
+
+> [!TIP]
+> **TIP:** To remove an extension, use the right mouse button on the extensions button, which will open the configuration directory. There, navigate into the subdirectories `include` and `Sources`. Then, simply delete both the configuration file of the extension (e.g. `myextension.source.json`) and the extension source code directory (e.g. `myextension`).
+
 ## Navigating Vistava
 
 Depending on your use case, you can control Vistava using the input devices described in the following sections — either on their own or in combination. Keep in mind that the controls described below are the default settings, which can be changed (as described in the section about [managing configurations](/4-advanced?id=managing-configurations)).

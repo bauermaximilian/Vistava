@@ -4,11 +4,7 @@ This page contains information for advanced users and developers who want to wor
 
 ## Building from source
 
-To build Vistava from source, you need Node.js (24.9 or newer), npm (11.6.2 or newer), and the .NET SDK (8.0.20 or newer). Either open the root repository folder in VS Code and run the "Build app (Windows)" or "Build app (Linux)" task, or open a command line interface in the root folder and run `npm install` followed by `npm run build:windows` or `npm run build:linux`. See the `/dist` folder for the build output.
-
-For building the Flatpak version, make sure you have `flatpak` and `flatpak-builder` installed. You also need the runtime and SDK installed with commands such as `flatpak install org.freedesktop.Platform/x86_64/25.08`, `flatpak install org.freedesktop.Sdk/x86_64/25.08`, and `flatpak install app/org.electronjs.Electron2.BaseApp/x86_64/25.08`. Then run `npm run build:linux-flatpak` to start the build.
-
-The Flatpak bundler pulls the sources for FFmpeg, libdav1d, and libx264 from their respective Git repositories and installs them into the Flatpak. This can take 5-10 minutes or longer, depending on your hardware. If the process fails, you can check the verbose log that is enabled by default for Flatpak builds.
+To build Vistava from source, you need Node.js (24.9 or newer), npm (11.6.2 or newer), and the .NET SDK with ASP.NET (10 or newer). Either open the root repository folder in VS Code and run the "Build app (Windows)" or "Build app (Linux)" task, or open a command line interface in the root folder and run `npm install` followed by `npm run build:windows` or `npm run build:linux`. See the `/dist` folder for the build output.
 
 ## "Headless mode"
 
@@ -34,25 +30,32 @@ To run the Vistava service, open a terminal in the directory where the applicati
 
 Vistava supports additional media sources as extensions. These extensions are loaded when Vistava starts and become available in the extension menu, which can be opened by clicking the extensions button (the puzzle piece symbol) in the application title bar.
 
+> [!TIP]
+> **Tip:** See the [SMK-Vistava](https://github.com/bauermaximilian/SMK-Vistava) repository for a simple example of a fully working extension and a possible setup for development and deployment.
+
 ### Implementation
 
-A "definition file" both defines the main entry point for the extension and specifies configuration parameters that can be edited by the user — for example, to add API keys or change the extension's behaviour. These files must end with `.source.json`, so a valid name for such a file would be `example.source.json`. The content of this file could look like this:
+A "definition file" both defines the extension identifier (through its name), the main entry point for the extension, and any configuration parameters that can be edited by the user — for example, to add API keys or change the extension's behaviour. These files must end with `.source.json`, so a valid name for such a file would be `example.source.json` (with "example" being the extension identifier then). The content of this file could look like this:
 
 ```json
 {
-   "moduleFileName": "SourceExample.js",
+   "moduleFileName": "example/SourceExample.js",
    "configuration": {
       "imageTextPrefix": "Ahoj"
    }
 }
 ```
 
-This definition file would set `SourceExample.js` as the entry point for the extension module, prompting Vistava to look for a default class module export that implements the `Source` base class (or derived classes thereof). Vistava would then instantiate this class and pass the object associated with the `configuration` key as the constructor parameter. A simple implementation of the `SourceExample` class could look like this:
+This definition file would set `SourceExample.js` (in the `example` subfolder) as the entry point for the extension module, prompting Vistava to look for a default class module export that implements the `Source` base class (or derived classes thereof). Vistava would then instantiate this class and pass the object associated with the `configuration` key as the constructor parameter. 
+
+> [!NOTE]
+> **Note:** The source file (and all other code files related to that extension) _must_ be inside a subdirectory with the exact same name as the extension identifier itself, which should consist of lowercase characters, numbers and underscores only! The display name of the extension can be different though.
+
+A simple implementation of the `SourceExample` class could look like this:
 
 ```javascript
 // Vistava makes the "vistava.js" library available at the path
-// "../Dependencies/vistava.js/src/", so it does not have to be
-// shipped with extensions (and really shouldn't, actually).
+// "../Dependencies/vistava.js/src/"
 import { Source } from "../Dependencies/vistava.js/src/Shared/Source.js";
 
 export class SourceExample extends Source {
@@ -116,9 +119,6 @@ This is a very simple example of an (infinite) source of mock media items. It do
 
 The abstract `SourceSegmented` class, which implements the `Source` base class, adds caching and pagination and can be used instead of the `Source` base class. There, the `createContentRetriever` method must be overridden; instead of returning an asynchronous function, it returns a `SourceSegmentedContentRetriever` instance. Any classes implementing that base class should override the `pageLength` property (returning the number of items per page) and the `getPageTilesAsync` method, which is used internally if a certain region of the item cache has not been loaded yet. The number of items returned by this method should match the `pageLength` property value unless the requested page is partially outside the bounds of the available content. In that case, the returned array may contain fewer items (or zero items). This information is used by the base class to determine the end of the item collection.
 
-> [!TIP]
-> **Tip:** Check out the available Vistava extensions on GitHub using the link on the main Vistava website to see implementations of "real" media sources for more in-depth examples of how to write extensions.
-
 ### Development and debugging
 
 An extension project repository should ideally follow the following directory structure for easier development and deployment:
@@ -131,8 +131,10 @@ An extension project repository should ideally follow the following directory st
 |       ├── ...
 ├── Sources
 │   ├── example.source.json
-│   ├── SourceExample.js
-│   └── ...
+|   ├── example
+│   |   ├── SourceExample.js
+│   |   └── ...
+|   └── ...
 └── README.md
 ```
 
@@ -144,3 +146,17 @@ For debugging and troubleshooting your implementation, you can run Vistava in de
 > **Tip:** Refreshing Vistava (using the "Refresh" button in the application title bar) also reloads the extensions, so you do not have to restart the application for code changes to take effect.
 
 Alternatively, you can also develop extensions directly as part of Vistava by placing your extension source files in the `service/wwwroot/Sources` directory inside the Vistava repository. This makes debugging in VS Code easier, but it requires rebuilding the application after every code change and makes it less straightforward to distribute the extension on its own. The `.gitignore` file in that directory also excludes any files besides the standard file system source from being committed to the repository by accident.
+
+### Deploying extensions
+
+Extensions should be deployed as a compressed ZIP archive with the file extension `.vex.zip`. The archive should, in its root, only contain the extension definition file (e.g. `example.source.json`) and a single directory (e.g. `example`) with all source files. As an example, the archive content of the example extension above could look as follows:
+
+```
+example.vex.zip
+├── example.source.json
+└── example
+    ├── SourceExample.js
+    └── ...
+```
+
+That `example.vex.zip` file can then be provided to users, who then would import it through the "Install extension..." option in Vistava.

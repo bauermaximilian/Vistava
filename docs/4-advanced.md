@@ -4,17 +4,6 @@ Vistava can be customized and extended in a few ways. In the current version, th
 
 Application configuration files, extensions, and certificates are stored in the application data folder, which is created automatically the first time Vistava starts. The location of this folder may vary depending on the operating system and how Vistava was installed. You can open it by clicking the extensions button (with the "puzzle piece" symbol) in the title bar using the middle or right mouse button.
 
-## Installing extensions
-
-> [!CAUTION]
-> **CAUTION:** Extensions can be a **security risk** and may contain malware. Only install them from trusted sources!
-
-Vistava supports extensions, which provide additional sources of media content. An extension usually consists of a definition file (with a `.source.json` extension, e.g., `example.source.json`) and one or more source files (with a `.js` extension). The source files may be organized in subfolders or placed directly alongside the definition file.
-
-To install an extension, copy both the definition file and the extension's source files directly into the "Sources" folder (`include/Sources/`).
-
-**Example:** Let's say we have an extension called "SourceExample", provided by its developer as a ZIP archive. Extracting the archive creates a folder containing `example.source.json` and `SourceExample.js`. Copy both files (not the parent folder) into the "Sources" directory. If that directory was empty, it will now contain those two files. Depending on the extension developer's instructions, you may need to edit `example.source.json` and make sure its JSON syntax is still valid before saving. After restarting Vistava, the extension should appear when you click the extensions button (with the "puzzle piece" symbol) in the title bar.
-
 ## Media cache
 
 As you browse, Vistava generates thumbnails for any media files it encounters. For video clips, it also attempts to determine the video's duration. This data is stored in a cache file named `cache.temp` in the application data folder.
