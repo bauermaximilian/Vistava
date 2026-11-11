@@ -560,6 +560,7 @@ export class MainApplicationView extends ViewBase {
       if (this.#hashRouter.source !== this.#sourceProvider.currentSourceIdentifier) {
          this.#hashRouter.source = this.#sourceProvider.currentSourceIdentifier;
          this.#hashRouter.path = "";
+         this.#hashRouter.detailViewVisible = false;
          this.#hashRouter.index = 0;
       }
       
