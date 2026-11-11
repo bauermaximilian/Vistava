@@ -8,7 +8,6 @@
         <DebugType>embedded</DebugType>
         <IsWebConfigTransformDisabled>true</IsWebConfigTransformDisabled>
         <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
-        <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
         <NoWarn>NU1901,NU1902</NoWarn>
     </PropertyGroup>
 
