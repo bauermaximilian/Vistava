@@ -3,7 +3,8 @@
 import { app } from "electron";
 import fs from "fs";
 import path from "path";
-import { spawn } from "child_process";
+import { spawn, exec } from "child_process";
+import { promisify } from "util";
 import { InvalidOperationError } from "./Errors.js";
 
 export class VistavaServiceManager {
@@ -120,3 +121,12 @@ export class VistavaServiceManager {
       }
    }
 }
+
+/**
+ * @param {string} command 
+ * @param {string} [cwd]
+ * @param {boolean} [hideWindow=true]
+ * @returns {Promise<{stdout:string,stderr:string}>}
+ */
+export const execAsync = async (command, cwd, hideWindow = true) =>
+   await (promisify(exec))(command, { windowsHide: hideWindow, cwd });

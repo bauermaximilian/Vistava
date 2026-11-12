@@ -93,7 +93,7 @@ export class Vistava {
                      "Do you want to open a web browser to download ffmpeg?",
                   buttons: ["Yes", "No"],
                   type: "warning"
-               });
+               }, "ffmpegWarning", 1);
 
                if (result.response === 0) {
                   await FFmpegChecker.openBrowserToDownloadFFmpeg();
@@ -102,6 +102,8 @@ export class Vistava {
                }
             }
          }
+
+         await vistava.#window.showFlatpakHintIfApplicable();
 
          await vistava.#window.show(`${vistava.#service.url}${urlFragment}`);
          if (debugMode) {

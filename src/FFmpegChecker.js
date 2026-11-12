@@ -1,19 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { exec } from "child_process";
-import { promisify } from "util";
 import { dirname } from "path";
 import { MissingDependenciesError } from "./Errors.js";
-import { VistavaServiceManager } from "./VistavaServiceManager.js";
-
-/**
- * @param {string} command 
- * @param {string} [cwd]
- * @param {boolean} [hideWindow=true]
- * @returns {Promise<{stdout:string,stderr:string}>}
- */
-const execAsync = async (command, cwd, hideWindow = true) =>
-   await (promisify(exec))(command, { windowsHide: hideWindow, cwd });
+import { execAsync, VistavaServiceManager } from "./VistavaServiceManager.js";
 
 export class FFmpegChecker {
    static async ensureFFmpegInstalled() {

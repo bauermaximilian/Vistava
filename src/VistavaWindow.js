@@ -4,20 +4,26 @@ import { BrowserWindow, dialog, screen, ipcMain, app, shell } from "electron";
 import { fileURLToPath } from "url";
 import { unpack, list } from '7zip-min';
 import fs from "node:fs";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "path";
+import { execAsync } from "./VistavaServiceManager.js";
 
 const extensionBundleFileExtension = "vex.zip";
 const extensionDefinitionFileExtension = ".source.json";
 const extensionTargetSubPath = "Service/v1.0/include/Sources";
+const shownMessagesFileSubPath = "Service/v1.0/.messageHistory.json";
 
 export class VistavaWindow {
    /** @type {BrowserWindow} */
    #window;
    /** @readonly @type {string} */
    #extensionTargetPath;
+   /** @readonly @type {string} */
+   #shownMessagesFilePath;
 
    constructor() {
       this.#extensionTargetPath = path.join(app.getPath("userData"), extensionTargetSubPath);
+      this.#shownMessagesFilePath = path.join(app.getPath("userData"), shownMessagesFileSubPath);
 
       const primaryDisplay = screen.getPrimaryDisplay()
       const { width, height, x, y } = primaryDisplay.workArea;
@@ -38,6 +44,7 @@ export class VistavaWindow {
             nodeIntegration: true
          }
       });
+      
       this.#window.on("close", this.#handleOnClose);
    }
 
@@ -60,10 +67,57 @@ export class VistavaWindow {
 
    /**
     * @param {Electron.MessageBoxOptions} options
+    * @param {string} [oneTimeDialogIdentifier]
+    * @param {number} [defaultResponse]
     * @returns {Promise<Electron.MessageBoxReturnValue>}
     */
-   async showDialog(options) {
-      return await dialog.showMessageBox(this.#window, options);
+   async showDialog(options, oneTimeDialogIdentifier, defaultResponse) {
+      let shownMessageIdentifiers = new Set();
+      try {
+         if (fs.existsSync(this.#shownMessagesFilePath)) {
+            let identifiers = JSON.parse(await readFile(this.#shownMessagesFilePath, "utf8"));
+            if (identifiers != null && Array.isArray(identifiers)) {
+               shownMessageIdentifiers = new Set(identifiers.map(i => String(i)));
+            }
+         }
+      } catch {
+         console.warn(`The message history file "${this.#shownMessagesFilePath}" can't be parsed.`);
+      }
+
+      /** @type {Electron.MessageBoxReturnValue} */
+      let dialogResult;
+      if (oneTimeDialogIdentifier == null || !shownMessageIdentifiers.has(oneTimeDialogIdentifier)) {
+         dialogResult = await dialog.showMessageBox(this.#window, options);
+      } else {
+         dialogResult = { response: defaultResponse ?? 0, checkboxChecked: false}
+      }
+
+      if (oneTimeDialogIdentifier != null) {
+         shownMessageIdentifiers.add(oneTimeDialogIdentifier);
+         await writeFile(this.#shownMessagesFilePath, JSON.stringify(Array.from(shownMessageIdentifiers)), "utf8");
+      }
+
+      return dialogResult;
+   }
+
+   async showFlatpakHintIfApplicable() {
+      let containerEnv = process.env["container"];
+      if (containerEnv != null && process.platform === "linux") {
+         let dialogResult = await this.showDialog({
+            type: "info",
+            title: "Flatpak information",
+            message: "You are running Vistava in a sandboxed flatpak environment with access only to the current " +
+               "user's images and videos. Please consult the Vistava documentation at www.vistava.net " +
+               "for information about allowing Vistava to access other locations on your file system.\n" +
+               "Do you want to open the documentation now?",
+            buttons: ["No", "Yes"],
+            defaultId: 1,
+            cancelId: 0
+         }, "flatpakInfo", 0);
+         if (dialogResult.response === 1) {
+            await execAsync(`xdg-open https://vistava.net/docs.html#/2-installation?id=flatpak`);
+         }
+      }
    }
 
    #handleOnClose = (/** @type {{ preventDefault: () => void; }} */ event) => {
@@ -72,7 +126,7 @@ export class VistavaWindow {
    };
 
    #handleShowExtensionImportDialogAsync = async () => {
-      let warningResult = await dialog.showMessageBox(this.#window, {
+      let warningResult = await this.showDialog({
          type: "warning",
          title: "Extension security warning",
          message: "Extensions could contain malicious code or leak your personal data. " +
@@ -80,7 +134,7 @@ export class VistavaWindow {
          buttons: ["Yes", "No"],
          defaultId: 1,
          cancelId: 1
-      });
+      }, "extensionWarning", 0);
 
       if (warningResult.response === 0) {
          let extensionResult = await dialog.showOpenDialog(this.#window, {
@@ -168,7 +222,7 @@ export class VistavaWindow {
          extensionIdentifier + extensionDefinitionFileExtension);
 
       if (this.#isExtensionAlreadyInstalled(extensionIdentifier)) {
-         let warningResult = await dialog.showMessageBox(this.#window, {
+         let warningResult = await this.showDialog({
             type: "warning",
             title: "Extension already exists",
             message: `The extension "${extensionIdentifier}" is already installed. ` +
@@ -192,7 +246,7 @@ export class VistavaWindow {
          return;
       }
 
-      let successResult = await dialog.showMessageBox(this.#window, {
+      let successResult = await this.showDialog({
          type: "info",
          title: "Extension installed successfully",
          message: `The extension "${extensionIdentifier}" was installed successfully! ` +
