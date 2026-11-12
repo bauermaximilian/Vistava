@@ -16,7 +16,7 @@
     "rebuild-icon": "cd build/icons && magick -background transparent -define 'icon:auto-resize=16,24,32,48,64,96,128,256,512' icon.svg icon.ico",
     "prebuild:windows": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Windows",
     "prebuild:linux": "dotnet publish ./service/Vistava.Service.csproj -p:PublishProfile=Linux $PREBUILD_ARGS",
-    "build:windows": "npm run prebuild:windows && node ./build/windows/get-ffmpeg.js && npm run prebuild:windows && electron-builder -w",   
+    "build:windows": "npm run prebuild:windows && node ./build/windows/get-ffmpeg.js && npm run prebuild:windows && electron-builder -w",
     "build:linux": "npm run prebuild:linux && electron-builder --linux dir",
     "start": "npm run prebuild:windows && npm run prebuild:linux && electron . --debug-mode",
     "start:service": "dotnet run --project ./service/Vistava.Service.csproj -- --allowCors=true --port=42069 --debug=true --disableHttps=true"
@@ -26,8 +26,8 @@
   },
   "devDependencies": {
     "7zip-min": "^3.0.1",
-    "electron": "40.1.0",
-    "electron-builder": "^26.7.0"
+    "electron": "^45.3.1",
+    "electron-builder": "^26.18.0"
   },
   "build": {
     "productName": "Vistava",
@@ -91,7 +91,6 @@
     }
   },
   "allowScripts": {
-    "electron@40.10.6": true,
     "electron-winstaller@5.4.0": true
   }
 }
