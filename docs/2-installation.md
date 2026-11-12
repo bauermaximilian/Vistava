@@ -28,39 +28,39 @@ After downloading the archive, extract it to a folder where you have sufficient 
 
 ## Linux
 
-To install Vistava on Linux, you'll need a **64-bit distribution** that supports Flatpak (as most modern distributions do, including Debian, Mint, Ubuntu, and Fedora) or is Arch-based (such as Arch itself, SteamOS 3+, CachyOS, or Manjaro).
+To install Vistava on Linux, you'll need a distribution that supports Flatpak (as most modern distributions do, including Debian, Mint, Ubuntu, and Fedora) or is Arch-based (such as Arch itself, SteamOS 3+, CachyOS, or Manjaro).
 
 ### Flatpak
 
-You can download the Flatpak package by clicking the "Flatpak (recommended)" link in the "Download" section on the [Vistava website](index.html#download ':ignore'), or by downloading the `.flatpak` asset (e.g., `vistava-linux-1.0.0.flatpak`) from the latest release on the GitHub releases page.
+You can install the Flatpak version directly through the Flatpak CLI tool or any application installer supporting Flatpak (like [Discover](https://apps.kde.org/discover/)). Assuming you have Flatpak installed and the official Flathub repository was added, you can install Vistava with a single command for the current user:
 
-After downloading, either open and install the file using an app like "Discover" (included in KDE) or run the following command in the directory containing the downloaded Flatpak file to install Vistava for the current user. Replace `vistava-linux-1.0.0.flatpak` with the actual name of the downloaded file:
+```bash
+flatpak install --user net.vistava.vistava # Omit "--user" for system-wide install
+```
+
+While not recommended, you can also download the Flatpak file from the [GitHub releases](https://github.com/bauermaximilian/Vistava/releases) page and install it like so:
 
 ```bash
 flatpak --user install vistava-linux-1.0.0.flatpak
 ```
 
-To install Vistava system-wide for all users, run:
-
-```bash
-flatpak install vistava-linux-1.0.0.flatpak
-```
-
-After installation, you can launch the application using the shortcuts created in your application launcher (in the "Graphics" and "Multimedia" categories) or by opening a directory with Vistava. The latter launches Vistava with that directory as its starting directory.
+After installation, you can launch the application using the shortcuts created in your application launcher (in the "Graphics" and "Multimedia" categories) or by opening a directory with Vistava. The latter launches Vistava with that directory as its starting directory. 
 
 #### Flatpak permissions
 
-By default, the Flatpak version **has read-only access to your home directory only**. To make other parts of your file system accessible, you can use an application like "Flatseal". In Flatseal, add a new entry under "Filesystem > Other files", then restart Vistava.
+By default, the Flatpak version **only has access to your picture and video folders** in your home directory. This is a restriction of Flatpak/Flathub and _not_ a bug in Vistava. 
 
-You can do the same from the command line. The following command allows read-only access to the example path `/media/Data`:
+However, you can make other paths of your file system accessible easily: To allow (read-only) access to the example path `/media/Data`, you can use the following command line command:
 
 ```bash
-flatpak override com.bauermaximilian.vistava --filesystem=/media/Data:ro
+flatpak override net.vistava.vistava --filesystem=/media/Data:ro
 ```
+
+Alternatively, you can use applications like [Flatseal](https://flathub.org/en/apps/com.github.tchx84.Flatseal) to manage the paths that Vistava may access via a GUI.
 
 ### Pacman
 
-Arch-based distributions (such as Arch itself, SteamOS 3+, CachyOS, or Manjaro) can install Vistava using the provided `pacman` package, either by downloading the file directly from the [Vistava website](index.html#download ':ignore') or through the AUR, using the package name `vistava-bin`.
+Arch-based distributions (such as Arch itself, SteamOS 3+, CachyOS, or Manjaro) can install Vistava using the provided `pacman` package from the [Vistava website](index.html#download ':ignore') as described below. ~~or through the AUR using the package name "vistava".~~ (Note: AUR currently does not accept new registrations)
 
 After installing Vistava using your preferred method below, you can launch it using the shortcuts created in your application launcher (in the "Graphics" and "Multimedia" categories), by opening a directory with Vistava in your file explorer, or by running the `vistava` command in a terminal.
 
