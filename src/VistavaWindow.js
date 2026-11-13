@@ -80,8 +80,8 @@ export class VistavaWindow {
                shownMessageIdentifiers = new Set(identifiers.map(i => String(i)));
             }
          }
-      } catch {
-         console.warn(`The message history file "${this.#shownMessagesFilePath}" can't be parsed.`);
+      } catch (error) {
+         console.warn(`The message history file "${this.#shownMessagesFilePath}" can't be parsed: ${error}`);
       }
 
       /** @type {Electron.MessageBoxReturnValue} */
@@ -94,7 +94,11 @@ export class VistavaWindow {
 
       if (oneTimeDialogIdentifier != null) {
          shownMessageIdentifiers.add(oneTimeDialogIdentifier);
-         await writeFile(this.#shownMessagesFilePath, JSON.stringify(Array.from(shownMessageIdentifiers)), "utf8");
+         try {
+            await writeFile(this.#shownMessagesFilePath, JSON.stringify(Array.from(shownMessageIdentifiers)), "utf8");
+         } catch (error) {
+            console.warn(`The message history file "${this.#shownMessagesFilePath}" can't be written: ${error}`);
+         }
       }
 
       return dialogResult;
@@ -105,11 +109,9 @@ export class VistavaWindow {
       if (containerEnv != null && process.platform === "linux") {
          let dialogResult = await this.showDialog({
             type: "info",
-            title: "Flatpak information",
-            message: "You are running Vistava in a sandboxed flatpak environment with access only to the current " +
-               "user's images and videos. Please consult the Vistava documentation at www.vistava.net " +
-               "for information about allowing Vistava to access other locations on your file system.\n" +
-               "Do you want to open the documentation now?",
+            title: "Limited file access",
+            message: "Flatpak limits Vistava's file access to your images and videos folders. " +
+               "The documentation explains how to grant access to other locations. Open it now?",
             buttons: ["No", "Yes"],
             defaultId: 1,
             cancelId: 0
