@@ -302,10 +302,12 @@ export class MainApplicationView extends ViewBase {
             s.display = "flex";
             s.flexDirection = "row";
             s.alignItems = "center";
-            s.paddingRight = s.paddingLeft = "8px";            
+            s.paddingLeft = "calc(env(titlebar-area-x, 0px) + 8px)";
+            s.paddingRight = "16px";
             s.backgroundColor = "#141414";
             s.color = "#b7b7b7ff";
             s.height = "36px";
+            s.width = "calc(env(titlebar-area-width, 100%) - 24px)";
             
             cu(null, HTMLDivElement, e, (e, s) => {
                s.flexGrow = "1";
@@ -390,16 +392,15 @@ export class MainApplicationView extends ViewBase {
             s.alignSelf = "end";
          });
          
-         this.#shareToggleButton = cu(this.#shareToggleButton, GuiIconView, this.#titleBar, (e, s) => {
+         this.#shareToggleButton = cu(this.#shareToggleButton, GuiIconView, this.#titleBar, e =>
             this.#initializeToolbarIcon(e, "share-network-disabled", this.#handleOnShareClick,
-               "Toggle local network sharing");
-            s.marginRight = "150px";
-         }, (e, s) => {
-            if (e.presenter === null) { return; }
-            this.#updateToolbarIcon(e);
-            e.presenter.model.icon = this.#getSetElementAttribute(e, "data-activated") ?
-               "share-network" : "share-network-disabled";
-         });
+               "Toggle local network sharing"),
+            (e, s) => {
+               if (e.presenter === null) { return; }
+               this.#updateToolbarIcon(e);
+               e.presenter.model.icon = this.#getSetElementAttribute(e, "data-activated") ?
+                  "share-network" : "share-network-disabled";
+            });
 
          this.#shareLinkPopup = cu(this.#shareLinkPopup, HTMLDivElement, this.#shareLinkPopupAnchor, (e, s) => {
             s.display = "flex";
