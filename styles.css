@@ -608,6 +608,12 @@ article, section {
   font-size: xx-small;
 }
 
+.footer-link {
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.1);
+  text-underline-offset: 0.18em;
+}
+
 @media (max-width: 900px) {
   .hero,
   .detail-panel {
