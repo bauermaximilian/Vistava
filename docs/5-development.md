@@ -6,6 +6,16 @@ This page contains information for advanced users and developers who want to wor
 
 To build Vistava from source, you need Node.js (24.9 or newer), npm (11.6.2 or newer), and the .NET SDK with ASP.NET (10 or newer). Either open the root repository folder in VS Code and run the "Build app (Windows)" or "Build app (Linux)" task, or open a command line interface in the root folder and run `npm install` followed by `npm run build:windows` or `npm run build:linux`. See the `/dist` folder for the build output.
 
+For running Vistava, the following dependencies need to be installed for the application to work correctly:
+- [.NET 10](https://learn.microsoft.com/en-us/dotnet/core/install/linux), specifically the ".NET Runtime" and the "ASP.NET Core Runtime"
+- ffmpeg-full
+
+If the application doesn't start at all with an error message claiming that the service couldn't be started or doesn't respond, this most likely refers to an issue with .NET. If the application starts but fails to generate any (or only a few) video thumbnails, the ffmpeg installation might lack some required codecs.
+
+### Debugging and troubleshooting
+
+To troubleshoot Vistava, it is recommended to launch it via command line and append the `--debug-mode` flag. This flag will enable verbose logging on the console itself and open the Electron "Developer Tools" window with Vistava, allowing to troubleshoot issues in the UI or with Electron.
+
 ## "Headless mode"
 
 Most of Vistava's functionality is provided through a background service. This service is usually started by the Electron wrapper, which is what users normally run and see when using Vistava. However, the background service can also be started separately, allowing Vistava to run as a headless service.
@@ -55,8 +65,8 @@ A simple implementation of the `SourceExample` class could look like this:
 
 ```javascript
 // Vistava makes the "vistava.js" library available at the path
-// "../Dependencies/vistava.js/src/"
-import { Source } from "../Dependencies/vistava.js/src/Shared/Source.js";
+// "../../Dependencies/vistava.js/src/"
+import { Source } from "../../Dependencies/vistava.js/src/Shared/Source.js";
 
 export class SourceExample extends Source {
    // The "Example source" label will be visible in Vistava

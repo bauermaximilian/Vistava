@@ -74,6 +74,10 @@ sudo pacman -U vistava-linux-1.0.0.pacman
 
 Confirm the installation of the package and wait for the process to complete.
 
+### Tarball
+
+Alternatively to the Flatpak route, you can also download the Tarball with the precompiled binaries (for x86_64) or build Vistava from source (for x86_64 or aarch64). In both cases, Vistava requires various dependencies to be installed prior to running the `vistava` executable in the tarball - you will find these in the section about [building Vistava from source](/5-development.md?building-from-source).
+
 ## Other OSes and platforms
 
 Vistava is currently not supported on operating systems or platforms other than those described above.
