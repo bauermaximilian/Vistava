@@ -28,23 +28,21 @@ After downloading the archive, extract it to a folder where you have sufficient 
 
 ## Linux
 
-To install Vistava on Linux, you'll need a distribution that supports Flatpak (as most modern distributions do, including Debian, Mint, Ubuntu, and Fedora) or is Arch-based (such as Arch itself, SteamOS 3+, CachyOS, or Manjaro).
+To install Vistava on Linux, you'll need a distribution that supports Flatpak (as most modern distributions do, including Debian, Mint, Ubuntu, Fedora and Raspberry Pi OS) or is Arch-based (such as Arch itself, SteamOS 3+, CachyOS, or Manjaro).
 
 ### Flatpak
 
 You can install the Flatpak version directly through the Flatpak CLI tool or any application installer supporting Flatpak (like [Discover](https://apps.kde.org/discover/)). Assuming you have Flatpak installed and the official Flathub repository was added, you can install Vistava with a single command for the current user:
 
 ```bash
-flatpak install --user net.vistava.vistava # Omit "--user" for system-wide install
+flatpak install --user net.vistava.vistava
 ```
 
-While not recommended, you can also download the Flatpak file from the [GitHub releases](https://github.com/bauermaximilian/Vistava/releases) page and install it like so:
+After installation, you can launch the application using the shortcuts created in your application launcher (in the "Graphics" and "Multimedia" categories), by opening a directory with Vistava, or by using the following command:
 
 ```bash
-flatpak --user install vistava-linux-1.0.0.flatpak
+flatpak run net.vistava.vistava
 ```
-
-After installation, you can launch the application using the shortcuts created in your application launcher (in the "Graphics" and "Multimedia" categories) or by opening a directory with Vistava. The latter launches Vistava with that directory as its starting directory. 
 
 #### Flatpak permissions
 
@@ -60,11 +58,11 @@ Alternatively, you can use applications like [Flatseal](https://flathub.org/en/a
 
 ### Pacman
 
-Arch-based distributions (such as Arch itself, SteamOS 3+, CachyOS, or Manjaro) can install Vistava using the provided `pacman` package from the [Vistava website](index.html#download ':ignore') as described below. ~~or through the AUR using the package name "vistava".~~ (Note: AUR currently does not accept new registrations)
+Arch-based distributions (such as Arch itself, SteamOS 3+, CachyOS, or Manjaro) can install Vistava using the provided `pacman` package from the [Vistava website](index.html#download ':ignore'). ~~or through the AUR using the package name "vistava".~~ (Note: Installation via AUR will be added once they accept new registrations again)
 
 After installing Vistava using your preferred method below, you can launch it using the shortcuts created in your application launcher (in the "Graphics" and "Multimedia" categories), by opening a directory with Vistava in your file explorer, or by running the `vistava` command in a terminal.
 
-#### Direct download
+#### Download pacman package
 
 You can download the `pacman` package by clicking the "Pacman package" link in the "Download" section on the Vistava website, or by downloading the `.pacman` asset (e.g., `vistava-linux-1.0.0.pacman`) from the latest release on the GitHub releases page.
 
