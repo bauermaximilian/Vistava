@@ -11,7 +11,7 @@ To install Vistava on Windows, you'll need **Windows 10 or newer (64-bit)**. You
 You can download the installer by clicking the "Installer (recommended)" link in the "Download" section on the [Vistava website](index.html#download ':ignore'), or by downloading the `.exe` asset (e.g., `vistava-win-setup-1.0.0.exe`) from the latest release on the GitHub releases page. After downloading, open the installer. 
 
 > [!NOTE]
-> **Note:** Windows might warn you that it prevented an unrecognized app from starting. That warning does not mean that Vistava contains any malware or spyware ([and it doesn't](https://www.virustotal.com/gui/url/67b63e2b33ade7640d8e388b9c0a4a6423d14d3bacd8ec093d5bc2e6d693160e)). This happens only because I didn't want to pay $100 a year for a developer certificate subscription. You can safely continue with the installation by clicking "More info" and then "Run anyway".
+> **Note:** Windows might warn you that it prevented an unrecognized app from starting. That warning does not mean that Vistava contains any malware or spyware ([and it doesn't](https://www.virustotal.com/gui/url/7866cc5acfd595e79442c7c49ccc631862b5ccdf1ca5bea7c92e4a12f1313bea)). This happens only because I didn't want to pay $100 a year for a developer certificate subscription. You can safely continue with the installation by clicking "More info" and then "Run anyway".
 
 An installation wizard should open shortly after. Click "Next" a few times, be sure to read the entire GPL-3 license (as one usually does), and then wait for setup to complete. Once installation is complete, you can run the application directly from the installer or use the shortcuts created in your Start menu or on your desktop.
 
