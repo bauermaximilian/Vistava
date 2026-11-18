@@ -30,6 +30,16 @@
   </description>
 
   <releases>
+    <release version="1.0.1" date="2026-11-18">
+      <url type="details">https://github.com/bauermaximilian/Vistava/releases/tag/v1.0.1</url>
+      <description>
+        <ul>
+          <li>Fix bug that could turn video elements blue</li>
+          <li>Fix bug which could cause video elements stay active in background</li>
+          <li>Fix broken documentation link in application metainfo</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-11-10">
       <url type="details">https://github.com/bauermaximilian/Vistava/releases/tag/v1.0.0</url>
       <description>
