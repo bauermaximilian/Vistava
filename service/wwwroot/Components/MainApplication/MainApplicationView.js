@@ -161,7 +161,7 @@ export class MainApplicationView extends ViewBase {
       this.#contextMenuEntries = [
          new ContextMenuEntryPresenter(new ContextMenuEntryModel({ label: "Install extension..." }),
             () => this.#tryOpenExtensionInstaller()),
-         new ContextMenuEntryPresenter(new ContextMenuEntryModel({ label: "Open settings" }),
+         new ContextMenuEntryPresenter(new ContextMenuEntryModel({ label: "Open settings folder" }),
             () => {
                if (this.#appDataFolderUri != null && this.#appDataFolderUri.length > 0) {
                   this.#tryOpenUrlAsPopup(this.#appDataFolderUri);
