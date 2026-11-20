@@ -208,8 +208,8 @@ article, section {
 }
 
 .button.primary {
-  background: linear-gradient(180deg, var(--accent) 0%, #9b2b2b 100%);
-  box-shadow: 0 12px 30px rgba(201, 68, 68, 0.28);
+  background: var(--accent);
+  box-shadow: 0 0 30px rgba(201, 68, 68, 0.28);
 }
 
 .button.secondary {
