@@ -1,3 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-public record ServiceInformation(string Version, string? AppDataFolderUri, bool DebugMode);
+namespace Vistava.Service.Common;
+
+public record ServiceInformation(string Version, bool DebugMode, string? AppDataFolderUri);

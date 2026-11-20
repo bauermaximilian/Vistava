@@ -126,6 +126,7 @@ public static class Program
         services.AddSingleton<MimeTypeProvider>();
         services.AddSingleton<AppPathProvider>();
         services.AddSingleton<MediaFileInfoProvider>();
+        services.AddSingleton<SourcesInfoProvider>();
         services.AddSingleton<IThumbnailProvider, EmbeddedThumbnailProvider>();
     }
 
