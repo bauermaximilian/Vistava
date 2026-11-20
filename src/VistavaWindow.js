@@ -46,15 +46,21 @@ export class VistavaWindow {
       });
       
       this.#window.on("close", this.#handleOnClose);
+
+      this.#window.webContents.on("did-navigate-in-page", this.#handleOnNavigatedOnPage);
    }
 
    /**
     * @param {string} url 
+    * @param {boolean} [isUserProvided=false]
     * @returns {Promise<void>}
     */
-   async show(url) {
+   async show(url, isUserProvided=false) {
       await this.#window.loadURL(url);
       this.#window.maximize();
+      if (isUserProvided) {
+         await this.showFlatpakHintIfApplicable();
+      }
    }
 
    close() {
@@ -129,6 +135,17 @@ export class VistavaWindow {
          }
       }
    }
+
+   #handleOnNavigatedOnPage = (/** @type {any} */ e, /** @type {string | URL} */ url) => {
+      let urlHash = new URL(url).hash;
+      if (urlHash.includes("?")) {
+         urlHash = urlHash.substring(0, urlHash.indexOf("?"));
+      }
+      if (urlHash === "#local:/") {
+         this.#window.webContents.off("did-navigate-in-page", this.#handleOnNavigatedOnPage);
+         this.showFlatpakHintIfApplicable();
+      }
+   };
 
    #handleOnClose = (/** @type {{ preventDefault: () => void; }} */ event) => {
       this.#window.webContents.session.clearStorageData().finally(() => this.#window.destroy());

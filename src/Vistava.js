@@ -7,7 +7,6 @@ import { VistavaWindow } from "./VistavaWindow.js";
 import { InvalidOperationError, MissingDependenciesError } from "./Errors.js";
 import { FFmpegChecker } from "./FFmpegChecker.js";
 
-const cliFlagSkipFFmpegCheck = "--skip-ffmpeg-check";
 const cliFlagDebug = "--debug-mode";
 
 export class Vistava {
@@ -42,9 +41,9 @@ export class Vistava {
       await app.whenReady();
 
       let debugMode = argv?.find(arg => arg.toLowerCase().startsWith(cliFlagDebug)) != null;
-      let skipFFmpegCheck = argv?.find(arg => arg.toLowerCase().startsWith(cliFlagSkipFFmpegCheck)) != null;
       
-      let urlFragment = "#local:";
+      const defaultUrlFragment = "#local:";
+      let urlFragment = defaultUrlFragment;
       try {
          if (argv != null && argv.length > 0) {
             let entryPath = argv[1].trim();
@@ -82,30 +81,26 @@ export class Vistava {
             throw new InvalidOperationError("The service did not provide a valid application URL.");
          }
 
-         if (!skipFFmpegCheck) {
-            try {
-               await FFmpegChecker.ensureFFmpegInstalled();
-            } catch (error) {
-               let result = await vistava.#window.showDialog({
-                  title: "Missing dependencies",
-                  message: "FFmpeg/FFprobe is not installed or wasn't found.\n" +
-                     "The application can be used, but video thumbnails will not be available. " +
-                     "Do you want to open a web browser to download ffmpeg?",
-                  buttons: ["Yes", "No"],
-                  type: "warning"
-               }, "ffmpegWarning", 1);
+         try {
+            await FFmpegChecker.ensureFFmpegInstalled();
+         } catch (error) {
+            let result = await vistava.#window.showDialog({
+               title: "Missing dependencies",
+               message: "FFmpeg/FFprobe is not installed or wasn't found.\n" +
+                  "The application can be used, but video thumbnails will not be available. " +
+                  "Do you want to open a web browser to download ffmpeg?",
+               buttons: ["Yes", "No"],
+               type: "warning"
+            }, "ffmpegWarning", 1);
 
-               if (result.response === 0) {
-                  await FFmpegChecker.openBrowserToDownloadFFmpeg();
-                  onClosing();
-                  return;
-               }
+            if (result.response === 0) {
+               await FFmpegChecker.openBrowserToDownloadFFmpeg();
+               onClosing();
+               return;
             }
          }
 
-         await vistava.#window.showFlatpakHintIfApplicable();
-
-         await vistava.#window.show(`${vistava.#service.url}${urlFragment}`);
+         await vistava.#window.show(`${vistava.#service.url}${urlFragment}`, urlFragment !== defaultUrlFragment);
          if (debugMode) {
             vistava.#window.openDevTools();
          }
