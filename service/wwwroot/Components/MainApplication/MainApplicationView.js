@@ -116,7 +116,7 @@ export class MainApplicationView extends ViewBase {
    /** @type {GuiIconView?} */
    #homeButton = null;
    /** @type {GuiIconView?} */
-   #extensionsButton = null;
+   #hamburgerButton = null;
    /** @type {GuiIconView?} */
    #shareToggleButton = null;
    /** @type {GuiIconView?} */
@@ -385,7 +385,7 @@ export class MainApplicationView extends ViewBase {
                   "share-network" : "share-network-disabled";
             });         
          
-         this.#extensionsButton = cu(this.#extensionsButton, GuiIconView, this.#titleBar, (e, s) => {
+         this.#hamburgerButton = cu(this.#hamburgerButton, GuiIconView, this.#titleBar, (e, s) => {
             this.#initializeToolbarIcon(e, "hamburger", () => {
                if (!ContextMenu.wasJustClosed) {
                   let buttonBounds = e.getBoundingClientRect();
@@ -394,9 +394,9 @@ export class MainApplicationView extends ViewBase {
                   ContextMenu.open(this.#contextMenuEntries,
                      RU.new(buttonBounds.x, barBounds.y, buttonBounds.width, barBounds.height));
                }
-            }, "Available media source extensions");
+            }, "Additional options");
             this.#updateToolbarIcon(e);
-         });
+         }, e => this.#updateToolbarIcon(e));
 
          this.#shareLinkPopup = cu(this.#shareLinkPopup, HTMLDivElement, this.#shareLinkPopupAnchor, (e, s) => {
             s.display = "flex";
