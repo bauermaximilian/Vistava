@@ -10,11 +10,11 @@ Welcome to the documentation of Vistava, the free open-source multimedia viewer!
   <img src="media/screenshot.png" alt="Vistava screenshot" />
 </p>
 
-Vistava is a chill, minimalist viewer for images and videos. It makes browsing your media simple - on any device.
+Vistava turns your media library into a peaceful, minimalist gallery - so you can focus on what you actually care about.
 
-- Browse your image and video library in peace
-- Navigate via mouse, keyboard, touch screen, or gamepad
-- Share your media to a TV, smartphone, or VR headset within your network
+- View your images and videos without distractions
+- Move through your library with ease - via mouse, keyboard, touch screen, or gamepad
+- Stream your media to any device with a web browser on your network - like a TV, smartphone, or VR headset
 - View content from third-party sources with optional extensions
 
 ## About Vistava
