@@ -4,7 +4,7 @@
 
 # Vistava
 
-A chill, minimalist viewer for images and videos. Makes browsing your media simple - on any device.
+Vistava turns your media library into a peaceful, minimalist gallery - so you can focus on what you actually care about.
 
 <p align="center">
   <img src="assets/screenshot.png" alt="Vistava screenshot" />
@@ -12,9 +12,9 @@ A chill, minimalist viewer for images and videos. Makes browsing your media simp
 
 ## What can you do with it?
 
-- Browse your image and video library in peace
-- Navigate via mouse, keyboard, touch screen, or gamepad
-- Share your media to a TV, smartphone, or VR headset within your network
+- View your images and videos without distractions
+- Move through your library with ease - via mouse, keyboard, touch screen, or gamepad
+- Stream your media to any device with a web browser on your network - like a TV, smartphone, or VR headset
 - View content from third-party sources with optional extensions
 
 ### Local network sharing
@@ -24,10 +24,6 @@ Enable the network sharing from the desktop app and Vistava generates a temporar
 That second device will then show the same UI and the same media library, so you can watch all your media on a Smart TV, tablet, phone, or VR headset without moving files around or going through some cloud service.
 
 Please make sure to read the [privacy information](https://vistava.net/docs.html#/README?id=privacy) and the [documentation](https://vistava.net/docs.html#/3-usage?id=local-network-sharing) of the local network sharing feature before enabling this functionality.
-
-### Extensions
-
-With extensions, Vistava can also view content from third-party media sources with HTTP APIs. Explore the available projects through the [Vistava GitHub topic](https://github.com/topics/vistava).
 
 ## Downloads
 
