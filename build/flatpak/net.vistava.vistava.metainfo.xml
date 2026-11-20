@@ -19,17 +19,32 @@
   
   <description>
     <p>
-      Vistava is a chill, minimalist viewer for images and videos. It makes browsing your media simple - on any device.
+      Vistava turns your media library into a peaceful, minimalist gallery - so you can focus on 
+      what you actually care about.
     </p>
     <ul>
-      <li>Browse your image and video library in peace</li>
-      <li>Navigate via mouse, keyboard, touch screen, or gamepad</li>
-      <li>Share your media to a TV, smartphone, or VR headset within your network</li>
+      <li>View your images and videos without distractions</li>
+      <li>Move through your library with ease - via mouse, keyboard, touch screen, or gamepad</li>
+      <li>Stream your media to any device with a web browser on your network - like a TV, smartphone, or VR headset</li>
       <li>View content from third-party sources with optional extensions</li>
     </ul>
+    <p>
+      Vistava is a free and open source. Share your feedback on the GitHub 
+      Discussions page using the contact link below!
+    </p>
   </description>
 
   <releases>
+    <release version="1.1.0" date="2026-11-20">
+      <url type="details">https://github.com/bauermaximilian/Vistava/releases/tag/v1.1.0</url>
+      <description>
+        <ul>
+          <li>Add new home screen with links to media folders and installed extensions</li>
+          <li>Improve application title bar and context menu</li>
+          <li>Show media controls in gallery view by default</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.1" date="2026-11-18">
       <url type="details">https://github.com/bauermaximilian/Vistava/releases/tag/v1.0.1</url>
       <description>
@@ -68,6 +83,7 @@
   <url type="help">https://vistava.net/docs.html</url>
   <url type="vcs-browser">https://github.com/bauermaximilian/Vistava</url>
   <url type="bugtracker">https://github.com/bauermaximilian/Vistava/issues</url>
+  <url type="contact">https://github.com/bauermaximilian/Vistava/discussions</url>
 
   <content_rating type="oars-1.0" />
 
