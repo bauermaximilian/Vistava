@@ -10,8 +10,8 @@ import { execAsync } from "./VistavaServiceManager.js";
 
 const extensionBundleFileExtension = "vex.zip";
 const extensionDefinitionFileExtension = ".source.json";
-const extensionTargetSubPath = "Service/v1.0/include/Sources";
-const shownMessagesFileSubPath = "Service/v1.0/.messageHistory.json";
+const extensionTargetSubPath = "include/Sources";
+const shownMessagesFileSubPath = ".messageHistory.json";
 
 export class VistavaWindow {
    /** @type {BrowserWindow} */
@@ -22,8 +22,8 @@ export class VistavaWindow {
    #shownMessagesFilePath;
 
    constructor() {
-      this.#extensionTargetPath = path.join(app.getPath("userData"), extensionTargetSubPath);
-      this.#shownMessagesFilePath = path.join(app.getPath("userData"), shownMessagesFileSubPath);
+      this.#extensionTargetPath = path.join(this.getVersionedUserDataPath(), extensionTargetSubPath);
+      this.#shownMessagesFilePath = path.join(this.getVersionedUserDataPath(), shownMessagesFileSubPath);
 
       const primaryDisplay = screen.getPrimaryDisplay()
       const { width, height, x, y } = primaryDisplay.workArea;
@@ -63,6 +63,14 @@ export class VistavaWindow {
 
    openDevTools() {
       this.#window?.webContents.openDevTools();
+   }
+
+   getVersionedUserDataPath() {
+      let versionComponents = app.getVersion().split(".");
+      if (versionComponents.length < 2) {
+         throw new Error("Invalid version number.");
+      }
+      return path.join(app.getPath("userData"), `Service/v${versionComponents[0]}.${versionComponents[1]}`);
    }
 
    /**
