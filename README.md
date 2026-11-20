@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.svg" alt="Vistava icon" width="72" height="72" />
+  <img src="assets/app-icon.svg" alt="Vistava icon" width="72" height="72" />
 </p>
 
 # Vistava
