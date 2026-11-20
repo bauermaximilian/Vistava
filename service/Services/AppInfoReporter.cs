@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.Reflection;
+
 namespace Vistava.Service.Services;
 
 public class AppInfoReporter(AppPathProvider pathProvider, ApplicationParameters applicationParameters,
@@ -23,5 +25,8 @@ public class AppInfoReporter(AppPathProvider pathProvider, ApplicationParameters
 
         logger.LogInformation("Using '{path}' for loading application includes.",
             applicationParameters.IncludePath);
+
+        logger.LogInformation("Application service version is \"{version}\".",
+            Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0");
     }
 }
