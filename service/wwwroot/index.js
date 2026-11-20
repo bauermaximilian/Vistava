@@ -46,17 +46,17 @@ BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, docum
       protocolError(new InvalidOperationError(`Couldn't retrieve service information: ${error}`));
    }   
 
-   let sources = {};
+   let sourceInfo = {};
    try {
       let sourcesRequest = await fetch("./api/options/sources");
-      sources = await sourcesRequest.json();
+      sourceInfo = await sourcesRequest.json();
    } catch (error) {
       protocolError(new ExtensionError(`Couldn't load extension source definitions: ${error}`));
    }
 
-   for (let sourceIdentifier of Object.keys(sources).filter(key => !key.startsWith("$"))) {
+   for (let sourceIdentifier of Object.keys(sourceInfo.sources)) {
       try {
-         let sourceDefinition = sources[sourceIdentifier];
+         let sourceDefinition = sourceInfo.sources[sourceIdentifier];
          await e.sourceProvider.addSource(sourceIdentifier,
             sourceDefinition.configuration, `../../Sources/${sourceDefinition.moduleFileName}`);
       } catch (error) {
@@ -65,7 +65,7 @@ BrowserUtils.executeWhenDocumentReady(() => cua(null, MainApplicationView, docum
       }
    }
 
-   for (let sourceError of sources["$errors"]) {
+   for (let sourceError of sourceInfo.errors) {
       protocolError(new ExtensionError(sourceError));
    }
 }, async (e, s) => {
