@@ -8,10 +8,10 @@ To install Vistava on Windows, you'll need **Windows 10 or newer (64-bit)**. You
 
 ### Installer
 
-You can download the installer by clicking the "Installer (recommended)" link in the "Download" section on the [Vistava website](index.html#download ':ignore'), or by downloading the `.exe` asset (e.g., `vistava-win-setup-1.0.0.exe`) from the latest release on the GitHub releases page. After downloading, open the installer. 
+You can download the installer by clicking the "Installer (recommended)" link in the "Download" section on the [Vistava website](index.html#download ':ignore'), or by downloading the `.exe` asset (e.g., `vistava-win-setup-1.1.0.exe`) from the latest release on the GitHub releases page. After downloading, open the installer. 
 
 > [!NOTE]
-> **Note:** Windows might warn you that it prevented an unrecognized app from starting. That warning does not mean that Vistava contains any malware or spyware ([and it doesn't](https://www.virustotal.com/gui/url/7866cc5acfd595e79442c7c49ccc631862b5ccdf1ca5bea7c92e4a12f1313bea)). This can happen when an app is relatively new and/or wasn't signed with a developer certificate that costs at least $100 a year. You can safely continue with the installation by clicking "More info" and then "Run anyway".
+> **Note:** Windows might warn you that it prevented an unrecognized app from starting. That warning does not mean that Vistava contains any malware or spyware ([and it doesn't](https://www.virustotal.com/gui/url/6319a99ba90b5b9667bc3895916ac1c1616aa7b2462278c59243e95db0096f21)). This can happen when an app is relatively new and/or wasn't signed with a developer certificate that costs at least $100 a year. You can safely continue with the installation by clicking "More info" and then "Run anyway".
 
 An installation wizard should open shortly after. Click "Next" a few times, be sure to read the entire GPL-3 license (as one usually does), and then wait for setup to complete. Once installation is complete, you can run the application directly from the installer or use the shortcuts created in your Start menu or on your desktop.
 
@@ -19,7 +19,7 @@ You can also right-click a folder in File Explorer to open Vistava directly in t
 
 ### ZIP archive
 
-You can download the portable ZIP archive by clicking the "Portable ZIP" link in the "Download" section on the [Vistava website](index.html#download ':ignore'), or by downloading the `.zip` asset (e.g., `vistava-win-1.0.0.zip`) from the latest release on the GitHub releases page.
+You can download the portable ZIP archive by clicking the "Portable ZIP" link in the "Download" section on the [Vistava website](index.html#download ':ignore'), or by downloading the `.zip` asset (e.g., `vistava-win-1.1.0.zip`) from the latest release on the GitHub releases page.
 
 After downloading the archive, extract it to a folder where you have sufficient permissions, such as your desktop or a USB stick. If you already have the FFmpeg dependency installed, start the application by opening the `Vistava.exe` (or `Vistava`) executable with the "V" icon in the extracted directory. Windows might warn you that it prevented an unrecognized app from starting. To continue, click "More info" and then "Run anyway".
 
@@ -64,12 +64,12 @@ After installing Vistava using your preferred method below, you can launch it us
 
 #### Download pacman package
 
-You can download the `pacman` package by clicking the "Pacman package" link in the "Download" section on the Vistava website, or by downloading the `.pacman` asset (e.g., `vistava-linux-1.0.0.pacman`) from the latest release on the GitHub releases page.
+You can download the `pacman` package by clicking the "Pacman package" link in the "Download" section on the Vistava website, or by downloading the `.pacman` asset (e.g., `vistava-linux-1.1.0.pacman`) from the latest release on the GitHub releases page.
 
-After downloading, run the following command in the directory containing the downloaded `pacman` file. Replace `vistava-linux-1.0.0.pacman` with the actual name of the downloaded file:
+After downloading, run the following command in the directory containing the downloaded `pacman` file. Replace `vistava-linux-1.1.0.pacman` with the actual name of the downloaded file:
 
 ```bash
-sudo pacman -U vistava-linux-1.0.0.pacman
+sudo pacman -U vistava-linux-1.1.0.pacman
 ```
 
 Confirm the installation of the package and wait for the process to complete.
