@@ -2,4 +2,4 @@
 
 namespace Vistava.Service.Common;
 
-public record SourceConfiguration(string ModuleFileName, object Configuration);
+public record SourceConfiguration(string ModuleFileName, IDictionary<string, object> Configuration);

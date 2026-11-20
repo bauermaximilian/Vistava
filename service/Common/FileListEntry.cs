@@ -9,6 +9,8 @@ public class FileListEntry
     public string? Label { get; init; }
 
     public string? QueryTarget { get; init; }
+    
+    public string? QuerySourceTarget { get; init; }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public FileListEntryType Type { get; init; }

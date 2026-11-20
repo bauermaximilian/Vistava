@@ -7,5 +7,7 @@ public enum FileListEntryType
    Media = 0,
    ChildCollection,
    ParentCollection,
-   SiblingCollection
+   PlaylistCollection,
+   LinkedCollection,
+   ExternalCollection
 }

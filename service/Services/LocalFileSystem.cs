@@ -11,7 +11,9 @@ using Vistava.Service.Utils;
 
 namespace Vistava.Service.Services;
 
-public class LocalFileSystem : ILocalFileSystem
+public class LocalFileSystem(IThumbnailProvider thumbnailProvider, MimeTypeProvider mimeTypeProvider,
+   MediaFileInfoProvider mediaFileInfoProvider, SourcesInfoProvider sourcesInfoProvider,
+   ILogger<LocalFileSystem> logger) : ILocalFileSystem
 {
 	private const string FileSystemEntryEnumerationPattern = "*";
 
@@ -33,21 +35,13 @@ public class LocalFileSystem : ILocalFileSystem
 		AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
 	};
 	
-	private readonly ILogger<LocalFileSystem> logger;
-	private readonly MimeTypeProvider mimeTypeProvider;
-	private readonly MediaFileInfoProvider mediaFileInfoProvider;
-	private readonly IThumbnailProvider thumbnailProvider;
+	private readonly ILogger<LocalFileSystem> logger = logger;
+	private readonly MimeTypeProvider mimeTypeProvider = mimeTypeProvider;
+	private readonly MediaFileInfoProvider mediaFileInfoProvider = mediaFileInfoProvider;
+	private readonly IThumbnailProvider thumbnailProvider = thumbnailProvider;
+	private readonly SourcesInfoProvider sourcesInfoProvider = sourcesInfoProvider;
 
-	public LocalFileSystem(IThumbnailProvider thumbnailProvider, MimeTypeProvider mimeTypeProvider, 
-		MediaFileInfoProvider mediaFileInfoProvider, ILogger<LocalFileSystem> logger)
-	{
-		this.logger = logger;
-		this.mimeTypeProvider = mimeTypeProvider;
-		this.mediaFileInfoProvider = mediaFileInfoProvider;
-		this.thumbnailProvider = thumbnailProvider;
-	}
-
-	public async Task<FileListEntryHandle> GetThumbnailAsync(string path, CancellationToken token)
+   public async Task<FileListEntryHandle> GetThumbnailAsync(string path, CancellationToken token)
 	{
 		token.ThrowIfCancellationRequested();
 
@@ -178,63 +172,64 @@ public class LocalFileSystem : ILocalFileSystem
 
 		var results = new List<FileListEntry>();
 
-		if (path.Length == 0 && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+		if (path.Length == 0)
 		{
-			results.AddRange(EnumerateDriveEntries(start, limit, token));
+			results.AddRange(await EnumerateDefaultEntriesAsync(start, limit, token));
 		}
 		else
 		{
-			var skippedEntries = 0;
-			var parentDirectoryEntry = GetPathParentDirectoryEntry(path);
-			if (parentDirectoryEntry != null)
+			if (path == "\\" && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
-				if (start == 0)
-				{
-					results.Add(parentDirectoryEntry);
-				}
-				else
-				{
-					skippedEntries = 1;
-				}
+				results.AddRange(EnumerateWindowsDriveEntries(start, limit, token));
 			}
-
-			if (path.Length == 0)
+			else
 			{
-				path = "/";
-			}
-
-			try
-			{
-
-				await foreach (var entry in EnumeratePathDirectoryEntriesAsync(path, token))
+				var skippedEntries = 0;
+				var parentDirectoryEntry = GetPathParentDirectoryEntry(path);
+				if (parentDirectoryEntry != null)
 				{
-					if ((start == 0 || (results.Count + skippedEntries) >= start) && results.Count < limit)
+					if (start == 0)
 					{
-						results.Add(entry);
+						results.Add(parentDirectoryEntry);
 					}
 					else
 					{
-						skippedEntries++;
+						skippedEntries = 1;
 					}
 				}
 
-				if (limit == 0 || results.Count < limit)
+				try
 				{
-					await foreach (var entry in EnumeratePathFileEntriesAsync(path, baseHostUri,
-						Math.Max(start - skippedEntries, 0), Math.Max(limit - results.Count, 0), token))
+					await foreach (var entry in EnumeratePathDirectoryEntriesAsync(path, token))
 					{
-						results.Add(entry);
+						if ((start == 0 || (results.Count + skippedEntries) >= start) && results.Count < limit)
+						{
+							results.Add(entry);
+						}
+						else
+						{
+							skippedEntries++;
+						}
+					}
+
+					if (limit == 0 || results.Count < limit)
+					{
+						await foreach (var entry in EnumeratePathFileEntriesAsync(path, baseHostUri,
+							Math.Max(start - skippedEntries, 0), Math.Max(limit - results.Count, 0), token))
+						{
+							results.Add(entry);
+						}
 					}
 				}
-			}
-			catch (TaskCanceledException)
-			{
-				throw;
-			}
-			catch (Exception exc)
-			{
-				logger.LogWarning("The content of the directory \"{path}\" (or parts of it) " +
-					"couldn't be accessed. {exc}", path, exc.Message);
+				catch (TaskCanceledException)
+				{
+					throw;
+				}
+				catch (Exception exc)
+				{
+					logger.LogWarning("The content of the directory \"{path}\" (or parts of it) " +
+						"couldn't be accessed. {exc}", path, exc.Message);
+				}
 			}
 		}
 
@@ -293,7 +288,57 @@ public class LocalFileSystem : ILocalFileSystem
 		return results;
 	}
 
-	private static IEnumerable<FileListEntry> EnumerateDriveEntries(int start, int limit, CancellationToken token)
+	private async Task<IEnumerable<FileListEntry>> EnumerateDefaultEntriesAsync(int start, int limit,
+		CancellationToken token)
+	{
+		const string local = "local";
+		var entries = new List<FileListEntry>();
+
+		List<(string Label, string Path, string Source)> defaultEntries = [
+			new("My Pictures", Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), local),
+			new("My Videos", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), local),
+			new("All local files", RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\\" : "/", local)
+		];
+
+		var sourceInfo = await sourcesInfoProvider.GetSourceInformationAsync(token);
+		foreach (var source in sourceInfo.Sources)
+		{
+			string sourceName = $"Extension \"{source.Key}\"";
+			if (source.Value.Configuration.TryGetValue("name", out var sourceNameValue) &&
+				sourceNameValue != null)
+			{
+				var sourceNameCandidate = sourceNameValue.ToString();
+				if (sourceNameCandidate != null)
+				{
+					sourceName = sourceNameCandidate;
+				}
+			}
+			
+			defaultEntries.Add(new(sourceName, "", source.Key));
+		}
+
+		for (var i = start; (limit > 0 ? i < limit : true) && i < defaultEntries.Count; i++)
+		{
+			var entry = defaultEntries[i];
+			if (token.IsCancellationRequested)
+			{
+				throw new TaskCanceledException();
+			}
+
+			entries.Add(new FileListEntry
+			{
+				Label = entry.Label,
+				QueryTarget = entry.Path,
+				QuerySourceTarget = entry.Source,
+				Type = entry.Source == local ? FileListEntryType.LinkedCollection : FileListEntryType.ExternalCollection,
+				FileSystemPath = entry.Path
+			});
+		}
+
+		return entries;
+	}
+
+	private static IEnumerable<FileListEntry> EnumerateWindowsDriveEntries(int start, int limit, CancellationToken token)
 	{
 		var drives = DriveInfo.GetDrives();
 		for (var i = start; (limit > 0 ? i < limit : true) && i < drives.Length; i++)
@@ -438,7 +483,7 @@ public class LocalFileSystem : ILocalFileSystem
 					QueryTarget = filePath,
 					FileSystemPath = filePath,
 					SourceUrl = new Uri(filePath).AbsoluteUri,
-					Type = FileListEntryType.SiblingCollection
+					Type = FileListEntryType.PlaylistCollection
 				};
 			}
 		}
