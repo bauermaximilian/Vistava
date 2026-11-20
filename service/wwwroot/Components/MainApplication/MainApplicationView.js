@@ -114,6 +114,8 @@ export class MainApplicationView extends ViewBase {
    /** @type {GuiIconView?} */
    #refreshButton = null;
    /** @type {GuiIconView?} */
+   #homeButton = null;
+   /** @type {GuiIconView?} */
    #extensionsButton = null;
    /** @type {GuiIconView?} */
    #shareToggleButton = null;
@@ -142,6 +144,7 @@ export class MainApplicationView extends ViewBase {
       super(true);
 
       this.#sourceProvider = new SourceProvider(this.#localSourceIdentifier, new SourceFileSystem({
+         name: "Local file system",
          hostUrl: this.#getApiUrl()
       }));
 
@@ -155,24 +158,18 @@ export class MainApplicationView extends ViewBase {
 
       BrowserUtils.subscribeToFullscreenChange(this.#handleOnFullscreenChange);
 
-      this.#contextMenuEntries = [];
-      for (let sourceIdentifier of this.#sourceProvider.sourceIdentifiers) {
-         let entryModel = new ContextMenuEntryModel();
-         entryModel.label = this.#sourceProvider.getSourceName(sourceIdentifier);
-         let entry = new ContextMenuEntryPresenter(entryModel);
-         entry.onActivated.subscribe(() => {
-            this.#sourceProvider.changeSource(sourceIdentifier);
-         });
-         this.#contextMenuEntries.push(entry);
-      }
-      this.#contextMenuEntries.push(new ContextMenuEntryPresenter(new ContextMenuEntryModel()));
-      let installExtensionEntryModel = new ContextMenuEntryModel();
-      installExtensionEntryModel.label = "Install extension...";
-      let installExtensionEntry = new ContextMenuEntryPresenter(installExtensionEntryModel);
-      installExtensionEntry.onActivated.subscribe(() => {
-         this.#tryOpenExtensionInstaller();
-      });
-      this.#contextMenuEntries.push(installExtensionEntry);
+      this.#contextMenuEntries = [
+         new ContextMenuEntryPresenter(new ContextMenuEntryModel({ label: "Install extension..." }),
+            () => this.#tryOpenExtensionInstaller()),
+         new ContextMenuEntryPresenter(new ContextMenuEntryModel({ label: "Open settings" }),
+            () => {
+               if (this.#appDataFolderUri != null && this.#appDataFolderUri.length > 0) {
+                  this.#tryOpenUrlAsPopup(this.#appDataFolderUri);
+               }
+            }),
+         new ContextMenuEntryPresenter(new ContextMenuEntryModel({ label: "Documentation" }),
+            () => this.#tryOpenUrlAsPopup("https://vistava.net/docs.html"))
+      ];
 
       this.style.display = "flex";
       this.style.flexDirection = "column";
@@ -348,24 +345,10 @@ export class MainApplicationView extends ViewBase {
          this.#backButton = cu(this.#backButton, GuiIconView, this.#titleBar,
             e => this.#initializeToolbarIcon(e, "back", () => history.back(), "Back"), 
             e => this.#updateToolbarIcon(e), null, true);
+         this.#homeButton = cu(this.#homeButton, GuiIconView, this.#titleBar,
+            e => this.#initializeToolbarIcon(e, "home", () => location.hash = "#local:", "Home"), 
+            e => this.#updateToolbarIcon(e), null, true);
          
-         this.#extensionsButton = cu(this.#extensionsButton, GuiIconView, this.#titleBar, (e, s) => {
-            this.#initializeToolbarIcon(e, "extension", () => {
-               if (!ContextMenu.wasJustClosed) {
-                  let buttonBounds = e.getBoundingClientRect();
-                  let barBounds = this.#titleBar?.getBoundingClientRect() ?? buttonBounds;
-                  ContextMenu.preferAlignmentLeft = true;
-                  ContextMenu.open(this.#contextMenuEntries,
-                     RU.new(buttonBounds.x, barBounds.y, buttonBounds.width, barBounds.height));
-               }
-            }, "Available media source extensions");
-            e.addEventListener("auxclick", () => {
-               if (this.#appDataFolderUri != null && this.#appDataFolderUri.length > 0) {
-                  this.#tryOpenUrlAsPopup(this.#appDataFolderUri);
-               }
-            });
-            this.#updateToolbarIcon(e);
-         });
          this.#shareLinkButton = cu(this.#shareLinkButton, GuiIconView, this.#titleBar, (e, s) => {
             this.#initializeToolbarIcon(e, "link", this.#handleOnShareLinkClick);
             e.addEventListener("mouseenter", () => {
@@ -400,7 +383,20 @@ export class MainApplicationView extends ViewBase {
                this.#updateToolbarIcon(e);
                e.presenter.model.icon = this.#getSetElementAttribute(e, "data-activated") ?
                   "share-network" : "share-network-disabled";
-            });
+            });         
+         
+         this.#extensionsButton = cu(this.#extensionsButton, GuiIconView, this.#titleBar, (e, s) => {
+            this.#initializeToolbarIcon(e, "hamburger", () => {
+               if (!ContextMenu.wasJustClosed) {
+                  let buttonBounds = e.getBoundingClientRect();
+                  let barBounds = this.#titleBar?.getBoundingClientRect() ?? buttonBounds;
+                  ContextMenu.preferAlignmentLeft = true;
+                  ContextMenu.open(this.#contextMenuEntries,
+                     RU.new(buttonBounds.x, barBounds.y, buttonBounds.width, barBounds.height));
+               }
+            }, "Available media source extensions");
+            this.#updateToolbarIcon(e);
+         });
 
          this.#shareLinkPopup = cu(this.#shareLinkPopup, HTMLDivElement, this.#shareLinkPopupAnchor, (e, s) => {
             s.display = "flex";
@@ -557,10 +553,11 @@ export class MainApplicationView extends ViewBase {
       }
    }
 
-   #handleOnSourceUpdated = () => {
+   /** @type {EventHandler<import("../Shared/SourceProvider.js").SourceChangedEventArgs>} */
+   #handleOnSourceUpdated = (args) => {
       if (this.#hashRouter.source !== this.#sourceProvider.currentSourceIdentifier) {
          this.#hashRouter.source = this.#sourceProvider.currentSourceIdentifier;
-         this.#hashRouter.path = "";
+         this.#hashRouter.path = args.initialQuery ?? "";
          this.#hashRouter.detailViewVisible = false;
          this.#hashRouter.index = 0;
       }
@@ -635,8 +632,12 @@ export class MainApplicationView extends ViewBase {
       let model = args.tile.presenter?.model;
       if (model == null) { return; }
 
+      let targetQuerySource = model?.getDataAsString("querySourceTarget", false) ?? null;
       let targetQuery = model?.getDataAsString("queryTarget", true) ?? null;
-      if (targetQuery !== null) {
+
+      if (targetQuerySource !== null && this.#sourceProvider.currentSourceIdentifier !== targetQuerySource) {
+         this.#sourceProvider.changeSource(targetQuerySource, targetQuery ?? "");
+      } else if (targetQuery !== null) {
          this.#hashRouter.index = model.index;
          this.#hashRouter.updateWindowHash(true);
          this.updateQuery(targetQuery);

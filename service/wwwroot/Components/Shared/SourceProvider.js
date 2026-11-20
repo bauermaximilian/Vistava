@@ -5,6 +5,11 @@ import { Assert } from "../../Dependencies/vistava.js/src/Shared/Assert.js";
 import { EventController } from "../../Dependencies/vistava.js/src/Shared/Event.js";
 import { InvalidOperationError } from "../../Dependencies/vistava.js/src/Errors/InvalidOperationError.js";
 
+/**
+ * @typedef {object} SourceChangedEventArgs
+ * @property {string} [initialQuery]
+ */
+
 export class SourceProvider {
    /** @type {number} */
    get count() { return this.#sources.size; }
@@ -19,7 +24,7 @@ export class SourceProvider {
 
    get onSourceChanged() { return this.#onSourceChanged.event; }
 
-   /** @type {EventController<void>} */
+   /** @type {EventController<SourceChangedEventArgs>} */
    #onSourceChanged = new EventController();
    /** @type {string} */
    #defaultSourceIdentifier;   
@@ -55,16 +60,17 @@ export class SourceProvider {
 
    /**
     * @param {string} sourceIdentifier 
+    * @param {string} [initialQuery] The initial query (optional).
     * @throws {InvalidOperationError} Is thrown when no source with the specified {@link sourceIdentifier} exists.
     */
-   changeSource(sourceIdentifier) {
+   changeSource(sourceIdentifier, initialQuery) {
       Assert.stringNotEmptyOrWhitespacesOnly(sourceIdentifier, "sourceIdentifier");
       if (sourceIdentifier !== this.#currentSourceIdentifier) {
          let newSource = this.#sources.get(sourceIdentifier);
          if (newSource != null) {
             this.#currentSource = newSource;
             this.#currentSourceIdentifier = sourceIdentifier;
-            this.#onSourceChanged.trigger();
+            this.#onSourceChanged.trigger({ initialQuery });
          } else {
             throw new InvalidOperationError("The specified source wasn't found.");
          }
