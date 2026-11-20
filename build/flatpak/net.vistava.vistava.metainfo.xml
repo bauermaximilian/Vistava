@@ -29,8 +29,8 @@
       <li>View content from third-party sources with optional extensions</li>
     </ul>
     <p>
-      Vistava is a free and open source. Share your feedback on the GitHub 
-      Discussions page using the contact link below!
+      Vistava is a free and open source. Share your feedback on the GitHub Discussions page using 
+      the contact link below!
     </p>
   </description>
 
@@ -42,6 +42,7 @@
           <li>Add new home screen with links to media folders and installed extensions</li>
           <li>Improve application title bar and context menu</li>
           <li>Show media controls in gallery view by default</li>
+          <li>Allow changing extension name in configuration</li>
         </ul>
       </description>
     </release>
