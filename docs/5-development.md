@@ -26,7 +26,7 @@ Most of Vistava's functionality is provided through a background service. This s
 To run the Vistava service, open a terminal in the directory where the application is installed. The service executable is located at `resources/app/bin/win/Vistava.Service.exe` on Windows or `resources/app/bin/linux/Vistava.Service.elf` on Linux. You can either run the application directly in the terminal or view the available command-line flags with `--help`:
 
 ```
-** Vistava.Service 1.0 **
+** Vistava.Service 1.1 **
 --help: Print this help. 
 --debug=true: Set default log level to 'debug'.
 --port=PORT: Accept for HTTP/S traffic on the specified port.
@@ -45,12 +45,13 @@ Vistava supports additional media sources as extensions. These extensions are lo
 
 ### Implementation
 
-A "definition file" both defines the extension identifier (through its name), the main entry point for the extension, and any configuration parameters that can be edited by the user — for example, to add API keys or change the extension's behaviour. These files must end with `.source.json`, so a valid name for such a file would be `example.source.json` (with "example" being the extension identifier then). The content of this file could look like this:
+A "definition file" both defines the extension identifier (through its name), the main entry point for the extension, and any configuration parameters that can be edited by the user — for example, to change the name/label of the extension in the UI, to add API keys or change the extension's behaviour. These files must end with `.source.json`, so a valid name for such a file would be `example.source.json` (with "example" being the extension identifier then). The content of this file could look like this:
 
 ```json
 {
    "moduleFileName": "example/SourceExample.js",
    "configuration": {
+      "name": "Example Extension",
       "imageTextPrefix": "Ahoj"
    }
 }
@@ -59,7 +60,7 @@ A "definition file" both defines the extension identifier (through its name), th
 This definition file would set `SourceExample.js` (in the `example` subfolder) as the entry point for the extension module, prompting Vistava to look for a default class module export that implements the `Source` base class (or derived classes thereof). Vistava would then instantiate this class and pass the object associated with the `configuration` key as the constructor parameter. 
 
 > [!NOTE]
-> **Note:** The source file (and all other code files related to that extension) _must_ be inside a subdirectory with the exact same name as the extension identifier itself, which should consist of lowercase characters, numbers and underscores only! The display name of the extension can be different though.
+> **Note:** The source file (and all other code files related to that extension) _must_ be inside a subdirectory with the exact same name as the extension identifier itself, which should consist of lowercase characters, numbers and underscores only! The display name can be different and is defined by the `configuration.name` parameter value in the `source.json` file.
 
 A simple implementation of the `SourceExample` class could look like this:
 
@@ -69,10 +70,6 @@ A simple implementation of the `SourceExample` class could look like this:
 import { Source } from "../../Dependencies/vistava.js/src/Shared/Source.js";
 
 export class SourceExample extends Source {
-   // The "Example source" label will be visible in Vistava
-   // as the extension name.
-   get name() { return "Example source"; }
-
    /**
     * @template T
     * @typedef {import(
