@@ -6,10 +6,6 @@ import { RateLimiter } from "../Dependencies/vistava.js/src/Shared/RateLimiter.j
 import { ArgumentError } from "../Dependencies/vistava.js/src/Errors/ArgumentError.js";
 
 /**
- * @typedef {object} AuthenticationFileSystem
- */
-
-/**
  * @typedef {import("../Dependencies/vistava.js/src/Shared/Source.js").SourceConfiguration & AdditionalSourceFileSystemConfiguration
  * } SourceFileSystemConfiguration
  */
@@ -18,13 +14,8 @@ export default class SourceFileSystem extends SourceSegmented {
    /** 
     * @typedef {object} AdditionalSourceFileSystemConfiguration
     * @property {string} hostUrl
-    * @property {AuthenticationFileSystem?} [authentication]
     */
 
-   get name() { return "Local file system"; }
-
-   /**  @readonly @type {AuthenticationFileSystem?} */
-   #authentication = null;
    /** @readonly @type {string} */
    #hostUrl;
 
@@ -49,11 +40,7 @@ export default class SourceFileSystem extends SourceSegmented {
          this.#hostUrl = hostUrl.toString();
       } catch (error) {
          throw new ArgumentError("The specified configuration.hostUrl is invalid.");
-      }
-
-      if (configuration.authentication != null) {
-         this.#authentication = configuration.authentication;
-      }    
+      } 
    }
 
    /**
@@ -63,7 +50,7 @@ export default class SourceFileSystem extends SourceSegmented {
     * @returns {SourceFileSystemContentRetriever}
     */
    createContentRetriever(query) {
-      return new SourceFileSystemContentRetriever(this.#hostUrl, query, this.#authentication);
+      return new SourceFileSystemContentRetriever(this.#hostUrl, query);
    }
 }
 
@@ -77,10 +64,9 @@ class SourceFileSystemContentRetriever extends SourceSegmentedContentRetriever {
 
    /**
     * @param {string} hostUrl 
-    * @param {string} query 
-    * @param {AuthenticationFileSystem?} [authentication]
+    * @param {string} query
     */
-   constructor(hostUrl, query, authentication) {
+   constructor(hostUrl, query) {
       super(query);
 
       this.#hostUrl = hostUrl;
