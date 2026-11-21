@@ -287,6 +287,17 @@ article, section {
   margin-bottom: 2rem;
 }
 
+.download .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.download-heading-copy {
+  min-width: 0;
+}
+
 .section-heading h2 {
   margin: 0;
   font-size: clamp(2rem, 4vw, 3.2rem);
@@ -493,6 +504,34 @@ article, section {
   gap: 1.25rem;
 }
 
+.version-banner {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 0.75rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgba(222, 104, 104, 0.3);
+  border-radius: 0.9rem;
+  background: linear-gradient(110deg, var(--accent-soft), rgba(255, 255, 255, 0.02) 70%);
+}
+
+.version-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.version-number {
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.05rem;
+  letter-spacing: 0.03em;
+}
+
 .download-card {
   padding: 1.6rem;
   border-radius: 1rem;
@@ -657,6 +696,12 @@ article, section {
 
   #download {
     min-height: calc(100svh - 16rem);
+  }
+
+  .download .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .lead br {
