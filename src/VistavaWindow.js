@@ -161,7 +161,7 @@ export class VistavaWindow {
          buttons: ["Yes", "No"],
          defaultId: 1,
          cancelId: 1
-      }, "extensionWarning", 0);
+      });
 
       if (warningResult.response === 0) {
          let extensionResult = await dialog.showOpenDialog(this.#window, {
