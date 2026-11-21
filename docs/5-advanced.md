@@ -163,7 +163,7 @@ All three are optional, but each must define the following two parameters if spe
 - `index`: An integer defining the axis index (starting at 0).
 - `invert`: A boolean (`true` or `false`) indicating whether to flip the direction of the axis input.
 
-The `"buttonActions"` section works similarly to the keyboard actions: the left value defines the button name (usually the button index as a string), and the right value is the associated action. See the [Actions](/4-advanced?id=actions) section above for a list of supported actions.
+The `"buttonActions"` section works similarly to the keyboard actions: the left value defines the button name (usually the button index as a string), and the right value is the associated action. See the [Actions](/5-advanced?id=actions) section above for a list of supported actions.
 
 ### Application settings
 

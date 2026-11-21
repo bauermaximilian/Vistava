@@ -15,23 +15,23 @@ The integrated HTTP server, which allows access to the application and your medi
 
 It should be noted that, even when the network sharing feature is enabled, Vistava itself does not require an active internet connection and does not pull/push any data to external services outside your local network. This does _not_ apply if any third-party extensions are installed, which _may_ pull (or push!) data from/to the internet.
 
-Advanced users can (try to) configure HTTPS for the network sharing feature to increase security. See the [related section](/4-advanced?id=enabling-https-support) for more information.
+Advanced users can (try to) configure HTTPS for the network sharing feature to increase security. See the [related section](/5-advanced?id=enabling-https-support) for more information.
 
 ## Installing extensions
 
 > [!CAUTION]
 > **CAUTION:** Extensions could contain **malicious code** or **leak your personal data**. Only install them from trusted sources!
 
-Vistava supports extensions, which provide additional sources of media content. An extension is usually distributed as a single file with the ".vex.zip" extension. The extension can be installed in Vistava by clicking the extensions button (with the "puzzle piece" symbol) in the title bar and then using the "Install extensions..." option. Read and confirm the security warning. Then, select the downloaded extension file in the file dialog and confirm your choice - and shortly after, Vistava should confirm the successful installation (or show an error message, if the process failed).
+Vistava supports extensions, which provide additional sources of media content. An extension is usually distributed as a single file with the ".vex.zip" extension. The extension can be installed in Vistava by clicking the menu button (with the three horizontal lines symbol) in the title bar and then using the "Install extensions..." option. Read and confirm the security warning. Then, select the downloaded extension file in the file dialog and confirm your choice - and shortly after, Vistava should confirm the successful installation (or show an error message, if the process failed).
 
 Vistava will also offer you to open the created configuration file of the extension (which might require a JSON editor like [Notepad++](https://notepad-plus-plus.org/) to be installed, but "normal" Notepad will also work). Please consult the documentation of the extension for information on if or how that file should be edited (e.g. to add an API key or change certain preferences).
 
 > [!TIP]
-> **TIP:** To remove an extension, use the right mouse button on the extensions button, which will open the configuration directory. There, navigate into the subdirectories `include` and `Sources`. Then, simply delete both the configuration file of the extension (e.g. `myextension.source.json`) and the extension source code directory (e.g. `myextension`).
+> **TIP:** To remove an extension, click on the menu button and select "Open settings folder", which will open the configuration directory. There, navigate into the subdirectories `include` and `Sources`. Then, simply delete both the configuration file of the extension (e.g. `myextension.source.json`) and the extension source code directory (e.g. `myextension`).
 
 ## Navigating Vistava
 
-Depending on your use case, you can control Vistava using the input devices described in the following sections — either on their own or in combination. Keep in mind that the controls described below are the default settings, which can be changed (as described in the section about [managing configurations](/4-advanced?id=managing-configurations)).
+Depending on your use case, you can control Vistava using the input devices described in the following sections — either on their own or in combination. Keep in mind that the controls described below are the default settings, which can be changed (as described in the section about [managing configurations](/5-advanced?id=managing-configurations)).
 
 Before getting into the different input schemes, it should be noted that there are two different view types in Vistava: the initial **thumbnail view**, with its masonry-like overview of the available media, and the **detail view**, which (like a slideshow) shows media items at their original size. As the two views have different purposes, the controls differ slightly and are described separately.
 
@@ -75,10 +75,10 @@ Double-click the left mouse button to toggle between fullscreen and windowed mod
 
 ### Gamepads
 
-Vistava can also be controlled using gamepads. This can be useful, for example, when running it on a PC or console (such as a Steam Deck) connected to a TV usually used for gaming. Two types of gamepads are supported by default, but you can add other currently unsupported game controllers via the configuration (as described in the section about [managing gamepad configurations](/4-advanced?id=gamepad-settings)).
+Vistava can also be controlled using gamepads. This can be useful, for example, when running it on a PC or console (such as a Steam Deck) connected to a TV usually used for gaming. Two types of gamepads are supported by default, but you can add other currently unsupported game controllers via the configuration (as described in the section about [managing gamepad configurations](/5-advanced?id=gamepad-settings)).
 
 > [!NOTE]
-> **Note:** Gamepad navigation is only supported over the Vistava desktop app. Advanced users may be able to get gamepad navigation to work on other devices (using local network sharing) by [setting up HTTPS](/4-advanced?id=enabling-https-support), but this has not been tested extensively.
+> **Note:** Gamepad navigation is only supported over the Vistava desktop app. Advanced users may be able to get gamepad navigation to work on other devices (using local network sharing) by [setting up HTTPS](/5-advanced?id=enabling-https-support), but this has not been tested extensively.
 
 #### Standard gamepads
 
