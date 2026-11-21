@@ -168,7 +168,9 @@ export class MainApplicationView extends ViewBase {
                }
             }),
          new ContextMenuEntryPresenter(new ContextMenuEntryModel({ label: "Documentation" }),
-            () => this.#tryOpenUrlAsPopup("https://vistava.net/docs.html"))
+            () => this.#tryOpenUrlAsPopup("https://vistava.net/docs.html")),
+         new ContextMenuEntryPresenter(new ContextMenuEntryModel({ label: "Quickstart" }),
+            () => this.#tryOpenUrlAsPopup("https://vistava.net/docs.html#/3-quickstart"))
       ];
 
       this.style.display = "flex";
