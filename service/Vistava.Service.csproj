@@ -30,4 +30,7 @@
         </EmbeddedResource>
     </ItemGroup>
 
+    <Target Name="DeletePreviousPublish" BeforeTargets="_CheckForUnsupportedTargetFramework">
+        <RemoveDir Directories="$(PublishDir)"></RemoveDir>
+    </Target>
 </Project>
