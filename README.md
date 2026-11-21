@@ -4,7 +4,7 @@
 
 # Vistava
 
-Vistava turns your media library into a peaceful, minimalist gallery - so you can focus on what you actually care about.
+Vistava turns your media library into a peaceful, minimalist gallery - your very own exhibition.
 
 <p align="center">
   <img src="assets/screenshot.png" alt="Vistava screenshot" />
@@ -13,9 +13,9 @@ Vistava turns your media library into a peaceful, minimalist gallery - so you ca
 ## What can you do with it?
 
 - View your images and videos without distractions
-- Move through your library with ease - via mouse, keyboard, touch screen, or gamepad
-- Stream your media to any device with a web browser on your network - like a TV, smartphone, or VR headset
-- View content from third-party sources with optional extensions
+- Move through your library easily - via mouse, keyboard, touch screen, or gamepad
+- Stream your media to any web browser on your network - like on a TV, smartphone, or VR headset
+- View content from third-party web sources with optional extensions
 
 ### Local network sharing
 
@@ -23,7 +23,7 @@ Enable the network sharing from the desktop app and Vistava generates a temporar
 
 That second device will then show the same UI and the same media library, so you can watch all your media on a Smart TV, tablet, phone, or VR headset without moving files around or going through some cloud service.
 
-Please make sure to read the [privacy information](https://vistava.net/docs.html#/README?id=privacy) and the [documentation](https://vistava.net/docs.html#/3-usage?id=local-network-sharing) of the local network sharing feature before enabling this functionality.
+Please make sure to read the [privacy information](https://vistava.net/docs.html#/README?id=privacy) and the [documentation](https://vistava.net/docs.html#/4-usage?id=local-network-sharing) of the local network sharing feature before enabling this functionality.
 
 ## Downloads
 
