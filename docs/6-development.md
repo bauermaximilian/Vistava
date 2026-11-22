@@ -41,40 +41,50 @@ To run the Vistava service, open a terminal in the directory where the applicati
 Vistava supports additional media sources as extensions. These extensions are loaded when Vistava starts and become available in the extension menu, which can be opened by clicking the extensions button (the puzzle piece symbol) in the application title bar.
 
 > [!TIP]
-> **Tip:** See the [SMK-Vistava](https://github.com/bauermaximilian/SMK-Vistava) repository for a simple example of a fully working extension and a possible setup for development and deployment.
+> **Tip:** It is highly recommended to use the [template repository for Vistava extensions](https://github.com/bauermaximilian/Vistava.Extension), which includes the following example code, build scripts and basic instructions.
 
 ### Implementation
 
-A "definition file" both defines the extension identifier (through its name), the main entry point for the extension, and any configuration parameters that can be edited by the user — for example, to change the name/label of the extension in the UI, to add API keys or change the extension's behaviour. These files must end with `.source.json`, so a valid name for such a file would be `example.source.json` (with "example" being the extension identifier then). The content of this file could look like this:
+A "definition file" both defines the extension identifier (through its name), the main entry point for the extension, and any configuration parameters that can be edited by the user — for example, to change the name/label of the extension in the UI, to add API keys or change the extension's behaviour. These files must end with `.source.json`, so a valid name for such a file would be `your_extension_id.source.json` (with "your_extension_id" being the extension identifier then). The content of this file could look like this:
 
 ```json
 {
-   "moduleFileName": "example/SourceExample.js",
+   "moduleFileName": "your_extension_id/SourceYourExtension.js",
    "configuration": {
-      "name": "Example Extension",
-      "imageTextPrefix": "Ahoj"
+      "name": "Extension Label displayed in Vistava",
+      "imageTextPrefix": "ugh"
    }
 }
 ```
 
-This definition file would set `SourceExample.js` (in the `example` subfolder) as the entry point for the extension module, prompting Vistava to look for a default class module export that implements the `Source` base class (or derived classes thereof). Vistava would then instantiate this class and pass the object associated with the `configuration` key as the constructor parameter. 
+This definition file would set `SourceYourExtension.js` (in the `your_extension_id` subfolder) as the entry point for the extension module, prompting Vistava to look for a default class module export that implements the `Source` base class (or derived classes thereof). Vistava would then instantiate this class and pass the object associated with the `configuration` key as the constructor parameter. 
 
 > [!NOTE]
-> **Note:** The source file (and all other code files related to that extension) _must_ be inside a subdirectory with the exact same name as the extension identifier itself, which should consist of lowercase characters, numbers and underscores only! The display name can be different and is defined by the `configuration.name` parameter value in the `source.json` file.
+> **Note:** The source file (and all other code files related to that extension) _must_ be inside a subdirectory with the exact same name as the extension identifier itself, which should consist of lowercase characters, numbers and underscores only! The display name can be different and is defined by the `configuration.name` parameter value in the `.source.json` file.
 
-A simple implementation of the `SourceExample` class could look like this:
+A simple implementation of the `SourceYourExtension` class could look like this:
 
 ```javascript
-// Vistava makes the "vistava.js" library available at the path
-// "../../Dependencies/vistava.js/src/"
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+// Vistava makes the "vistava.js" library available at the path 
+// "../../Dependencies/vistava.js/src/" (relative to this file when deployed).
 import { Source } from "../../Dependencies/vistava.js/src/Shared/Source.js";
 
-export class SourceExample extends Source {
+// If your source provides paginated results, consider using "SourceSegmented" instead.
+export default class SourceYourExtension extends Source {
+   // The following JSdoc typedefs work similar to a file-scoped import.
    /**
     * @template T
     * @typedef {import(
-    * "../Dependencies/vistava.js/src/Shared/CachedCollection.js")
+    * "../../Dependencies/vistava.js/src/Shared/CachedCollection.js")
     * .CollectionRetriever<T>} CollectionRetriever<T>
+    */
+
+   /**
+    * @typedef {import(
+    * "../../Dependencies/vistava.js/src/Components/TileGrid/Shared/TileValue.js")
+    * .TileValueInitializer} TileValueInitializer
     */
 
    /**
@@ -86,11 +96,13 @@ export class SourceExample extends Source {
    }
 
    /**
-    * @param {string} query
-    * @returns {CollectionRetriever<object>}
+    * @param {string} query The query string, provided by Vistava, user input or the "queryTarget"
+    * value of a tile the user clicked.
+    * @returns {CollectionRetriever<TileValueInitializer>}
     */
    createCollectionRetriever(query) {
       return async (offset, count) => {
+         /** @type {TileValueInitializer[]} */
          let results = [];
          for (let i = 0; i < count; i++) {
             results.push(this.#generateValue(query, i + offset));
@@ -102,7 +114,8 @@ export class SourceExample extends Source {
    /**
     * @param {string} query
     * @param {number} index
-    * @returns {object}
+    * @returns {TileValueInitializer} An object initializer used to populate the tiles shown 
+    * to the user.
     */
    #generateValue(query, index) {
       // Generate an image text using the "imageTextPrefix"
@@ -137,9 +150,9 @@ An extension project repository should ideally follow the following directory st
 │       ├── src
 |       ├── ...
 ├── Sources
-│   ├── example.source.json
-|   ├── example
-│   |   ├── SourceExample.js
+│   ├── your_extension_id.source.json
+|   ├── your_extension_id
+│   |   ├── SourceYourExtension.js
 │   |   └── ...
 |   └── ...
 └── README.md
@@ -156,14 +169,17 @@ Alternatively, you can also develop extensions directly as part of Vistava by pl
 
 ### Deploying extensions
 
+> [!TIP]
+> **Tip:** If the template repository was used, the "build" action will do this automatically for you.
+
 Extensions should be deployed as a compressed ZIP archive with the file extension `.vex.zip`. The archive should, in its root, only contain the extension definition file (e.g. `example.source.json`) and a single directory (e.g. `example`) with all source files. As an example, the archive content of the example extension above could look as follows:
 
 ```
-example.vex.zip
-├── example.source.json
-└── example
-    ├── SourceExample.js
+your_extension_id-1.0.0.vex.zip
+├── your_extension_id.source.json
+└── your_extension_id
+    ├── SourceYourExtension.js
     └── ...
 ```
 
-That `example.vex.zip` file can then be provided to users, who then would import it through the "Install extension..." option in Vistava.
+That `your_extension_id-1.0.0.vex` file can then be provided to users, who then would import it through the "Install extension..." option in Vistava.
