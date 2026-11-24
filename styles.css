@@ -321,19 +321,6 @@ article, section {
   min-height: 100%;
 }
 
-.icon-wrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 0.75rem;
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
 .feature-card h3 {
   margin: 0 0 0.75rem;
   font-size: 1.2rem;
@@ -432,9 +419,6 @@ article, section {
 }
 
 .compact-panel {
-  display: flex;
-  gap: 1.25rem;
-  align-items: flex-start;
   padding: 1.75rem;
   border: 1px solid var(--border);
   border-radius: 1.25rem;
@@ -443,21 +427,6 @@ article, section {
 
 .about-panel {
   background: rgba(255, 255, 255, 0.015);
-}
-
-.compact-mark {
-  display: flex;
-  flex: 0 0 3rem;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border: 1px solid rgba(222, 104, 104, 0.35);
-  border-radius: 0.85rem;
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  font-size: 1.35rem;
-  font-weight: 800;
 }
 
 .compact-copy h2 {
